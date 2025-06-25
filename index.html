@@ -15,7 +15,9 @@
         #hakubun-text {
             writing-mode: vertical-rl;
             text-orientation: mixed;
-            white-space: nowrap;
+            /* white-space: nowrap; を削除して折り返しを許可 */
+            line-height: 1.6; /* 行間を調整して見やすくする */
+            max-height: 100%;
         }
         .feedback-correct {
             color: #16a34a; /* green-600 */
@@ -45,7 +47,7 @@
                 <div id="score-counter" class="text-lg font-bold text-green-600"></div>
             </div>
             
-            <div class="bg-slate-50 border-r-4 border-slate-200 p-6 rounded-lg mb-6 flex justify-center items-center h-40">
+            <div class="bg-slate-50 border-r-4 border-slate-200 p-6 rounded-lg mb-6 flex justify-center h-48">
                 <p id="hakubun-text" class="text-4xl font-serif text-slate-900"></p>
             </div>
 
