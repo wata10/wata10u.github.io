@@ -15,15 +15,31 @@
         #hakubun-text {
             writing-mode: vertical-rl;
             text-orientation: mixed;
-            /* white-space: nowrap; を削除して折り返しを許可 */
-            line-height: 1.6; /* 行間を調整して見やすくする */
-            max-height: 100%;
+            line-height: 1.8;
+            padding-right: 1rem; /* スクロールバーとの余白 */
+            white-space: nowrap; /* 文章を折り返さず、縦にスクロールさせる */
         }
         .feedback-correct {
             color: #16a34a; /* green-600 */
         }
         .feedback-incorrect {
             color: #dc2626; /* red-600 */
+        }
+        /* スクロールバーのスタイル（モダンブラウザ向け） */
+        .scrollbar-custom::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .scrollbar-custom::-webkit-scrollbar-track {
+            background: #f1f5f9; /* slate-100 */
+            border-radius: 10px;
+        }
+        .scrollbar-custom::-webkit-scrollbar-thumb {
+            background: #94a3b8; /* slate-400 */
+            border-radius: 10px;
+        }
+        .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+            background: #64748b; /* slate-500 */
         }
     </style>
 </head>
@@ -47,7 +63,7 @@
                 <div id="score-counter" class="text-lg font-bold text-green-600"></div>
             </div>
             
-            <div class="bg-slate-50 border-r-4 border-slate-200 p-6 rounded-lg mb-6 flex justify-center h-48">
+            <div class="bg-slate-50 border-r-4 border-slate-200 p-4 rounded-lg mb-6 h-72 flex justify-center overflow-y-auto scrollbar-custom">
                 <p id="hakubun-text" class="text-4xl font-serif text-slate-900"></p>
             </div>
 
@@ -93,7 +109,7 @@
     <script>
         // --- データの準備 ---
         const questions = [
-            // 第1回
+            // 全200問のデータ
             { id: 1, kuhou: "否定", hakubun: "君子不争。", kakikudashi: "君子は争はず。", gendaigo: "徳のある立派な人は争わない。" },
             { id: 2, kuhou: "疑問", hakubun: "誰能為此。", kakikudashi: "誰か能く此を為さん。", gendaigo: "誰がこれをできるだろうか。" },
             { id: 3, kuhou: "反語", hakubun: "燕雀安知鴻鵠之志哉。", kakikudashi: "燕雀安くんぞ鴻鵠の志を知らんや。", gendaigo: "ツバメやスズメにどうしてオオトリの志が分かろうか、いや分かりはしない。" },
@@ -104,7 +120,6 @@
             { id: 8, kuhou: "仮定", hakubun: "若如公言、則四方之民望之矣。", kakikudashi: "若し公の言の如くんば、則ち四方の民之を望まん。", gendaigo: "もしあなたのお言葉通りなら、四方の民は（あなたを）待ち望むでしょう。" },
             { id: 9, kuhou: "限定", hakubun: "唯我独尊。", kakikudashi: "唯だ我独り尊し。", gendaigo: "ただ私だけが尊い。" },
             { id: 10, kuhou: "再読文字", hakubun: "臣将奏之。", kakikudashi: "臣将に之を奏せんとす。", gendaigo: "私めは今にもこのことを君主に申し上げようとしております。" },
-            // 第2回
             { id: 11, kuhou: "禁止", hakubun: "過則勿憚改。", kakikudashi: "過てば則ち改むるに憚ること勿かれ。", gendaigo: "過ちを犯したならば、改めることをためらってはならない。" },
             { id: 12, kuhou: "二重否定", hakubun: "不可不知也。", kakikudashi: "知らざるべからずなり。", gendaigo: "知らないわけにはいかないのだ。" },
             { id: 13, kuhou: "選択", hakubun: "寧為鶏口、無為牛後。", kakikudashi: "寧ろ鶏口と為るとも、牛後と為る無かれ。", gendaigo: "いっそ鶏の口（小さな団体の長）となっても、牛の尻（大きな団体の末端）となるな。" },
@@ -115,7 +130,6 @@
             { id: 18, kuhou: "比況", hakubun: "光陰如箭。", kakikudashi: "光陰箭の如し。", gendaigo: "月日の経つのは矢のようである。" },
             { id: 19, kuhou: "詠嘆", hakubun: "嗚呼、天之亡我。", kakikudashi: "嗚呼、天の我を亡ぼすか。", gendaigo: "ああ、天が私を滅ぼすのか。" },
             { id: 20, kuhou: "再読文字", hakubun: "君未嘗語大夫。", kakikudashi: "君未だ嘗て大夫に語らず。", gendaigo: "あなたはまだ一度も家老と話したことがない。" },
-            // 第3回
             { id: 21, kuhou: "部分否定", hakubun: "不必皆聖。", kakikudashi: "必ずしも皆聖人ならず。", gendaigo: "必ずしも皆が聖人であるとは限らない。" },
             { id: 22, kuhou: "反語(豈)", hakubun: "豈無父母乎。", kakikudashi: "豈に父母無からんや。", gendaigo: "どうして父母がいないことがあろうか、いやいるはずだ。" },
             { id: 23, kuhou: "受身(見)", hakubun: "吾常見笑於大方之家。", kakikudashi: "吾常に大方の家に笑はる。", gendaigo: "私はいつも専門家たちに笑われる。" },
@@ -126,7 +140,6 @@
             { id: 28, kuhou: "願望(冀)", hakubun: "冀君之察吾有道之言也。", kakikudashi: "冀はくは君の吾が有道の言を察せんことを。", gendaigo: "どうかあなたが私の道理にかなった言葉をお察しくださることを願います。" },
             { id: 29, kuhou: "比況(猶)", hakubun: "過猶不及。", kakikudashi: "過ぎたるは猶ほ及ばざるがごとし。", gendaigo: "やり過ぎることは、やり足りないことと同じくらい良くない。" },
             { id: 30, kuhou: "再読文字(当)", hakubun: "及時当勉励。", kakikudashi: "時に及びて当に勉励すべし。", gendaigo: "時機を逃さず当然努力すべきである。" },
-            // 第4回
             { id: 31, kuhou: "全面否定(莫)", hakubun: "天下莫能与之争。", kakikudashi: "天下能く之と争ふ莫し。", gendaigo: "天下に彼と争うことができる者は誰もいない。" },
             { id: 32, kuhou: "反語(勧告)", hakubun: "客何為不去。", kakikudashi: "客何為れぞ去らざる。", gendaigo: "あなたはどうして立ち去らないのか、立ち去ればよいのに。" },
             { id: 33, kuhou: "受身(被)", hakubun: "信而見疑、忠而被謗。", kakikudashi: "信にして疑はれ、忠にして謗らる。", gendaigo: "誠実であっても疑われ、忠義を尽くしてもそしられる。" },
@@ -137,7 +150,6 @@
             { id: 38, kuhou: "詠嘆(乎)", hakubun: "危乎高哉。", kakikudashi: "危ふきかな高きかな。", gendaigo: "なんと危険でなんと高いことか。" },
             { id: 39, kuhou: "禁止(毋)", hakubun: "己所不欲、毋施於人。", kakikudashi: "己の欲せざる所、人に施すこと毋かれ。", gendaigo: "自分がしてほしくないことを、他人にしてはならない。" },
             { id: 40, kuhou: "再読文字(宜)", hakubun: "宜急追之。", kakikudashi: "宜しく急に之を追ふべし。", gendaigo: "急いで彼らを追うのがよい。" },
-            // 第5回
             { id: 41, kuhou: "否定(非)", hakubun: "人非聖人。", kakikudashi: "人は聖人にあらず。", gendaigo: "人は聖人ではない。" },
             { id: 42, kuhou: "疑問(何処)", hakubun: "先生何処也。", kakikudashi: "先生何処にか在る。", gendaigo: "先生はどこにいらっしゃるのですか。" },
             { id: 43, kuhou: "反語(不亦〜乎)", hakubun: "不亦楽乎。", kakikudashi: "亦た楽しからずや。", gendaigo: "またなんと楽しいことではないか。" },
@@ -148,7 +160,6 @@
             { id: 48, kuhou: "限定(但)", hakubun: "不聞機杼声、但聞女歎息。", kakikudashi: "機杼の声を聞かず、但だ女の歎息を聞く。", gendaigo: "機織りの音は聞こえず、ただ娘のため息が聞こえるだけだ。" },
             { id: 49, kuhou: "受身(為〜所)", hakubun: "身為漢軍所虜。", kakikudashi: "身は漢軍の虜とする所と為る。", gendaigo: "自身は漢軍の捕虜となった。" },
             { id: 50, kuhou: "再読文字(須)", hakubun: "須早入関。", kakikudashi: "須く早く関に入るべし。", gendaigo: "ぜひとも早く（函谷）関に入るべきだ。" },
-            // 第6回
             { id: 51, kuhou: "二重否定(非不)", hakubun: "非不説子之道。", kakikudashi: "子の道を説ばざるに非ず。", gendaigo: "あなたの道を喜ばないわけではない。" },
             { id: 52, kuhou: "禁止(莫)", hakubun: "莫道人之短。", kakikudashi: "人の短を道ふこと莫かれ。", gendaigo: "他人の短所を言ってはならない。" },
             { id: 53, kuhou: "選択(A与B孰)", hakubun: "我与爾孰愈。", kakikudashi: "我と爾と孰れか愈れる。", gendaigo: "私とあなたとではどちらが優れているか。" },
@@ -159,7 +170,6 @@
             { id: 58, kuhou: "比況(若)", hakubun: "君子之交淡若水。", kakikudashi: "君子の交はりは淡きこと水の若し。", gendaigo: "君子の交際は、水のようにあっさりしている。" },
             { id: 59, kuhou: "詠嘆(嗚呼)", hakubun: "嗚呼哀哉。", kakikudashi: "嗚呼哀しいかな。", gendaigo: "ああ、なんと悲しいことか。" },
             { id: 60, kuhou: "再読文字(蓋)", hakubun: "蓋亦反其本矣。", kakikudashi: "蓋し亦其の本に反らんや。", gendaigo: "どうしてその根本に立ち返らないのか、立ち返ればよい。" },
-            // 第7回
             { id: 61, kuhou: "否定(無)", hakubun: "人無遠慮、必有近憂。", kakikudashi: "人にして遠慮無ければ、必ず近き憂ひ有り。", gendaigo: "先々のことを考えなければ、必ず身近に心配事が起こる。" },
             { id: 62, kuhou: "疑問(何以)", hakubun: "何以知其然乎。", kakikudashi: "何を以て其の然るを知るや。", gendaigo: "どうしてそうであると分かるのか。" },
             { id: 63, kuhou: "使役(聴)", hakubun: "聴其自然。", kakikudashi: "其の自然に聴す。", gendaigo: "その自然のままに任せる。" },
@@ -170,7 +180,6 @@
             { id: 68, kuhou: "抑揚(すら...況んや...をや)", hakubun: "王侯将相、寧有種乎。", kakikudashi: "王侯将相、寧くんぞ種有らんや。", gendaigo: "王・侯・将軍・宰相といった高貴な身分は、どうして（生まれつきの）血筋があろうか、いやない。" },
             { id: 69, kuhou: "比況(譬)", hakubun: "譬如積土成山。", kakikudashi: "譬へば土を積んで山を成すがごとし。", gendaigo: "たとえば土を積んで山を作るようなものだ。" },
             { id: 70, kuhou: "再読文字(盍)", hakubun: "子盍言之。", kakikudashi: "子盍ぞ之を言はざる。", gendaigo: "あなたはどうしてそのことを言わないのか、言えばよいのに。" },
-            // 第8回
             { id: 71, kuhou: "否定(無A無B)", hakubun: "無貴無賤、無長無少。", kakikudashi: "貴と無く賤と無く、長と無く少と無く。", gendaigo: "身分が高い者も低い者もなく、年長者も年少者もない。" },
             { id: 72, kuhou: "疑問(安)", hakubun: "君安之。", kakikudashi: "君安くにか之く。", gendaigo: "あなたはどこへ行くのですか。" },
             { id: 73, kuhou: "二重否定(無不)", hakubun: "無不為之。", kakikudashi: "之を為さざるは無し。", gendaigo: "これをしないことはない（必ずこれをする）。" },
@@ -181,7 +190,6 @@
             { id: 78, kuhou: "限定(直)", hakubun: "直百歩耳。", kakikudashi: "直だ百歩のみ。", gendaigo: "わずか百歩にすぎない。" },
             { id: 79, kuhou: "累加(亦)", hakubun: "死亦我所悪。", kakikudashi: "死も亦た我が悪む所なり。", gendaigo: "死もまた私の憎むところである。" },
             { id: 80, kuhou: "再読文字(応)", hakubun: "応知故郷事。", kakikudashi: "応に故郷の事を知るべし。", gendaigo: "きっと故郷の事を分かってくれるにちがいない。" },
-            // 第9回
             { id: 81, kuhou: "二重否定(無A不B)", hakubun: "無友不如己者。", kakikudashi: "己に如かざる者を友とすること無かれ。", gendaigo: "自分に及ばない者を友人とするな。" },
             { id: 82, kuhou: "疑問(何則)", hakubun: "是何異於刺人而殺之。", kakikudashi: "是れ人を刺して之を殺すに何ぞ異ならん。", gendaigo: "これは、人を刺して殺すのと、どうして違いがあろうか。" },
             { id: 83, kuhou: "反語(悪乎)", hakubun: "君子去仁、悪乎成名。", kakikudashi: "君子仁を去りて、悪くんぞ名を成さん。", gendaigo: "君子が仁を捨てて、どうして名声をあげることができようか、いやできない。" },
@@ -192,7 +200,6 @@
             { id: 88, kuhou: "仮定(苟)", hakubun: "苟富貴、無相忘。", kakikudashi: "苟しくも富貴ならば、相忘るること無からん。", gendaigo: "もしも富貴の身になったとしても、お互いに忘れないようにしよう。" },
             { id: 89, kuhou: "限定(唯)", hakubun: "唯仁者宜在高位。", kakikudashi: "唯だ仁者のみ高位に在るに宜し。", gendaigo: "ただ仁徳のある者だけが高い地位にいるのがふさわしい。" },
             { id: 90, kuhou: "再読文字(且)", hakubun: "年且暮。", kakikudashi: "年且に暮れんとす。", gendaigo: "歳がまさに暮れようとしている。" },
-            // 第10回
             { id: 91, kuhou: "否定(無所)", hakubun: "無所不為。", kakikudashi: "為さざる所無し。", gendaigo: "しないことはない（どんなことでもする）。" },
             { id: 92, kuhou: "疑問(奚)", hakubun: "子奚不為政。", kakikudashi: "子奚ぞ政を為さざる。", gendaigo: "あなたはなぜ政治をしないのですか。" },
             { id: 93, kuhou: "反語(何〜為)", hakubun: "何為撃我。", kakikudashi: "何為れぞ我を撃つ。", gendaigo: "どうして私を撃つのか、撃つ必要はないのに。" },
@@ -203,7 +210,6 @@
             { id: 98, kuhou: "願望(幸)", hakubun: "幸聴寡人之言。", kakikudashi: "幸に寡人の言を聴け。", gendaigo: "どうか私の言葉を聞いてほしい。" },
             { id: 99, kuhou: "比較(孰与)", hakubun: "功孰与高帝。", kakikudashi: "功は高帝と孰れぞ。", gendaigo: "功績は（私と）高祖とどちらが大きいか。" },
             { id: 100, kuhou: "再読文字/二重否定", hakubun: "未嘗不嘆息痛恨。", kakikudashi: "未だ嘗て嘆息痛恨せずんばあらず。", gendaigo: "（桓帝・霊帝のことを思うと）今まで嘆き悲しみ、残念に思わないことはなかった。" },
-            // 第11回
             { id: 101, kuhou: "否定(無敢)", hakubun: "無敢直言。", kakikudashi: "敢へて直言する無し。", gendaigo: "だれもあえて直接的な言葉で諫めようとしない。" },
             { id: 102, kuhou: "反語(安...乎)", hakubun: "安能以此知之乎。", kakikudashi: "安くんぞ此を以て之を知るや。", gendaigo: "どうしてこれによってそのことを知ることができようか、いやできない。" },
             { id: 103, kuhou: "受身(為...所)", hakubun: "不為酒困。", kakikudashi: "酒に困しまれず。", gendaigo: "酒のために苦しめられることがない。" },
@@ -214,7 +220,6 @@
             { id: 108, kuhou: "限定(非独)", hakubun: "非独百姓為然。", kakikudashi: "独り百姓のみ然りと為すに非ず。", gendaigo: "ただ人民だけがそうなのではない。" },
             { id: 109, kuhou: "抑揚", hakubun: "管仲且知礼、況君乎。", kakikudashi: "管仲すら且つ礼を知る、況んや君をや。", gendaigo: "管仲でさえ礼をわきまえている、まして君主であるあなたが知らないはずはない。" },
             { id: 110, kuhou: "再読文字(将)", hakubun: "天将降大任於是人也。", kakikudashi: "天将に大任を是の人に降さんとするなり。", gendaigo: "天がこの人に重大な任務を与えようとしているのだ。" },
-            // 第12回
             { id: 111, kuhou: "二重否定(非不)", hakubun: "非不欲也、力不足也。", kakikudashi: "欲せざるに非ざるなり、力足らざるなり。", gendaigo: "望んでいないわけではない、力が足りないのだ。" },
             { id: 112, kuhou: "禁止(勿)", hakubun: "勿以悪小而為之。", kakikudashi: "悪の小なるを以て之を為すこと勿かれ。", gendaigo: "悪事が小さいからといって、それをしてはならない。" },
             { id: 113, kuhou: "選択(寧...不...)", hakubun: "寧為玉砕、不為瓦全。", kakikudashi: "寧ろ玉砕と為るとも、瓦全と為るなかれ。", gendaigo: "いっそ玉となって砕け散っても、瓦のまま完全であるな。" },
@@ -225,7 +230,6 @@
             { id: 118, kuhou: "比況(如)", hakubun: "視死如帰。", kakikudashi: "死を視ること帰するがごとし。", gendaigo: "死ぬことを故郷へ帰るように（なんとも思わず）見る。" },
             { id: 119, kuhou: "比較", hakubun: "功孰与高帝。", kakikudashi: "功は高帝と孰れぞ。", gendaigo: "功績は（私と）高祖とどちらが大きいか。" },
             { id: 120, kuhou: "再読文字(未)", hakubun: "未聞好学者也。", kakikudashi: "未だ学を好む者を聞かざるなり。", gendaigo: "まだ学問を好む者を聞いたことがない。" },
-            // 第13回
             { id: 121, kuhou: "否定(無A不B)", hakubun: "無求備於一人。", kakikudashi: "一人の人に備はらんことを求むること無し。", gendaigo: "一人の人間に、全てが備わっていることを求めてはいけない。" },
             { id: 122, kuhou: "反語(何以)", hakubun: "何以報徳。", kakikudashi: "何を以て徳に報いん。", gendaigo: "何によって（受けた）恩に報いたらよいのか、いや報いるものはない。" },
             { id: 123, kuhou: "受身(見)", hakubun: "吾常見欺於長者。", kakikudashi: "吾常に長者に欺かる。", gendaigo: "私はいつも年長者にだまされる。" },
@@ -236,7 +240,6 @@
             { id: 128, kuhou: "限定(独)", hakubun: "斉独無人乎。", kakikudashi: "斉独り人無からんや。", gendaigo: "斉の国だけ、どうして人材がいないことがあろうか、いやいるはずだ。" },
             { id: 129, kuhou: "詠嘆(嗚呼)", hakubun: "嗚呼、子之心刻矣。", kakikudashi: "嗚呼、子の心は刻なり。", gendaigo: "ああ、あなたの心はなんと残酷なことか。" },
             { id: 130, kuhou: "再読文字(当)", hakubun: "当知此意。", kakikudashi: "当に此の意を知るべし。", gendaigo: "当然この意味を知っておくべきだ。" },
-            // 第14回
             { id: 131, kuhou: "二重否定(非無)", hakubun: "非無賢人也。", kakikudashi: "賢人無きに非ざるなり。", gendaigo: "賢人がいないわけではない。" },
             { id: 132, kuhou: "禁止(不)", hakubun: "不入虎穴、不得虎子。", kakikudashi: "虎穴に入らずんば、虎子を得ず。", gendaigo: "虎の棲む穴に入らなければ、虎の子を得ることはできない。" },
             { id: 133, kuhou: "選択(孰与)", hakubun: "我孰与君少。", kakikudashi: "我と君と孰れか少なる。", gendaigo: "私とあなたではどちらが若いか。" },
@@ -247,7 +250,6 @@
             { id: 138, kuhou: "比況(〜の若し)", hakubun: "対人若氷。", kakikudashi: "人に対すること氷の若し。", gendaigo: "人に対する態度は氷のように冷たい。" },
             { id: 139, kuhou: "受身(為)", hakubun: "不為物役。", kakikudashi: "物に役せられず。", gendaigo: "（欲望などの）対象に支配されない。" },
             { id: 140, kuhou: "再読文字(盍)", hakubun: "子盍為我言之。", kakikudashi: "子盍ぞ我が為に之を言はざる。", gendaigo: "あなたはなぜ私のためにそのことを言ってくれないのか、言ってくれればよいのに。" },
-            // 第15回
             { id: 141, kuhou: "否定(弗)", hakubun: "吾弗能已。", kakikudashi: "吾能く已むこと弗はざるなり。", gendaigo: "私は（学ぶことを）やめることができないのだ。" },
             { id: 142, kuhou: "疑問(何故)", hakubun: "君実有功、何故不言。", kakikudashi: "君実に功有り、何故ぞ言はざる。", gendaigo: "あなたは本当に功績があるのに、どうしてそれを言わないのか。" },
             { id: 143, kuhou: "反語(何)", hakubun: "何為泣。", kakikudashi: "何為れぞ泣く。", gendaigo: "どうして泣くのか、いや泣く必要はない。" },
@@ -258,7 +260,6 @@
             { id: 148, kuhou: "限定(特)", hakubun: "特与嬰児戯耳。", kakikudashi: "特だ嬰児と戯るるのみ。", gendaigo: "ただ子供とふざけているだけだ。" },
             { id: 149, kuhou: "詠嘆(猗)", hakubun: "猗歟休哉。", kakikudashi: "猗歟休なるかな。", gendaigo: "ああ、なんとすばらしいことか。" },
             { id: 150, kuhou: "再読文字(蓋)", hakubun: "蓋莫如是。", kakikudashi: "蓋し是くの如きは莫し。", gendaigo: "思うにこれほどのものはないだろう。" },
-            // 第16回
             { id: 151, kuhou: "二重否定(未嘗不)", hakubun: "未嘗不廃書而歎也。", kakikudashi: "未だ嘗て書を廃して嘆ぜずんばあらざるなり。", gendaigo: "（書物を読むたびに）いつも書物を手放して嘆かないことはなかった。" },
             { id: 152, kuhou: "禁止(無)", hakubun: "無望其福。", kakikudashi: "其の福を望むこと無かれ。", gendaigo: "その幸福を望んではいけない。" },
             { id: 153, kuhou: "選択(与其...寧...)", hakubun: "与其奢也、寧倹。", kakikudashi: "其の奢らんよりは、寧ろ倹なれ。", gendaigo: "（葬儀は）贅沢であるよりは、むしろ質素であるべきだ。" },
@@ -269,7 +270,6 @@
             { id: 158, kuhou: "比況(猶)", hakubun: "雖有智者、猶不能知也。", kakikudashi: "智者有りと雖も、猶ほ知ること能はざるなり。", gendaigo: "たとえ知者がいたとしても、やはり知ることはできない。" },
             { id: 159, kuhou: "仮定(向)", hakubun: "向使四君脩徳、則韓国必安。", kakikudashi: "向に四君をして徳を脩めしめば、則ち韓国必ず安からん。", gendaigo: "もし以前に四人の君主が徳を修めていたならば、韓国は必ず安泰だったであろうに。" },
             { id: 160, kuhou: "再読文字(応)", hakubun: "応是天仙狂酔。", kakikudashi: "応に是れ天仙の狂酔なるべし。", gendaigo: "これはきっと天上の仙人がひどく酔っぱらっているのだろう。" },
-            // 第17回
             { id: 161, kuhou: "否定(毋)", hakubun: "無偏無党。", kakikudashi: "偏無く党無し。", gendaigo: "（どちらにも）肩入れせず、徒党を組むこともない。" },
             { id: 162, kuhou: "疑問(幾何)", hakubun: "其後幾何。", kakikudashi: "其の後幾何ぞ。", gendaigo: "それからどれくらいの時間が経ったか。" },
             { id: 163, kuhou: "反語(何ぞや)", hakubun: "是何言也。", kakikudashi: "是れ何なる言ぞや。", gendaigo: "これは何という（ひどい）言葉だ。" },
@@ -280,7 +280,6 @@
             { id: 168, kuhou: "限定(直)", hakubun: "所載直米五斗。", kakikudashi: "載する所は直だ米五斗のみ。", gendaigo: "積んでいるものは、わずかに米五斗だけだ。" },
             { id: 169, kuhou: "抑揚(〜すらいまだ...況や〜をや)", hakubun: "臣死且不避、卮酒安足辞。", kakikudashi: "臣死すら且つ避けず、卮酒安くんぞ辞するに足らん。", gendaigo: "私（のような者）は死でさえも避けはしない、どうして大杯の酒を断ることができようか、いやできない。" },
             { id: 170, kuhou: "再読文字(須)", hakubun: "人生得意須尽歓。", kakikudashi: "人生意を得ては須からく歓を尽くすべし。", gendaigo: "人生で得意な時には、ぜひとも歓楽をきわめるべきだ。" },
-            // 第18回
             { id: 171, kuhou: "二重否定(不為不)", hakubun: "不為不成。", kakikudashi: "為さざれば成らざるなり。", gendaigo: "しなければ成就しないものだ。" },
             { id: 172, kuhou: "禁止(莫)", hakubun: "莫愁前路無知己。", kakikudashi: "愁ふること莫かれ前路に知己無きを。", gendaigo: "これからの道中に自分を理解してくれる人がいないことを心配することはない。" },
             { id: 173, kuhou: "使役(命)", hakubun: "命駕、遂至其家。", kakikudashi: "駕を命じ、遂に其の家に至る。", gendaigo: "車を準備させて、とうとうその家に着いた。" },
@@ -291,7 +290,6 @@
             { id: 178, kuhou: "比況(若)", hakubun: "人生若寄。", kakikudashi: "人生は寄するが若し。", gendaigo: "人生は（この世に一時的に）身を寄せているようなものである。" },
             { id: 179, kuhou: "仮定(郷)", hakubun: "郷使不守、必困。", kakikudashi: "郷に使守らざらしめば、必ず困しめん。", gendaigo: "もし以前に守らせていなかったならば、きっと困窮していたであろう。" },
             { id: 180, kuhou: "再読文字(宜)", hakubun: "花開堪折直須折。", kakikudashi: "花開き折るに堪へば直ちに須らく折るべし。", gendaigo: "花が咲いて手折ることができるならば、すぐに手折るべきだ。" },
-            // 第19回
             { id: 181, kuhou: "二重否定(不倶)", hakubun: "不倶戴天。", kakikudashi: "倶には天を戴かず。", gendaigo: "（仇敵とは）同じ天の下にはいない（生かしてはおかない）。" },
             { id: 182, kuhou: "疑問(乎)", hakubun: "王之好楽甚、則斉国其庶几乎。", kakikudashi: "王の楽を好むこと甚だしければ、則ち斉の国は其れ庶幾からんか。", gendaigo: "王が音楽をお好きなことがこれほどであれば、斉の国は（天下を治めるに）近いでしょうか。" },
             { id: 183, kuhou: "反語(敢不)", hakubun: "敢不敬乎。", kakikudashi: "敢へて敬せざらんや。", gendaigo: "どうして敬わずにいられようか、いや敬わないはずはない。" },
@@ -302,7 +300,6 @@
             { id: 188, kuhou: "限定(唯...而已)", hakubun: "我心之憂、蓋是二三子之故。", kakikudashi: "我が心の憂へは、蓋し是れ二三子の故なり。", gendaigo: "私の心の心配事は、思うにあなたたち数人のことである。" },
             { id: 189, kuhou: "抑揚(〜すら...況んや...)", hakubun: "鬼神且不能知、而況於人乎。", kakikudashi: "鬼神すら且つ知ること能はず、而るを況んや人に於いてをや。", gendaigo: "鬼や神でさえ知ることができない、まして人間ならなおさらだ。" },
             { id: 190, kuhou: "再読文字(盍)", hakubun: "盍各言爾志。", kakikudashi: "盍ぞ各爾の志を言はざる。", gendaigo: "どうしてそれぞれお前の志を言わないのか、言えばよいのに。" },
-            // 第20回
             { id: 191, kuhou: "二重否定(不為無)", hakubun: "不為無益。", kakikudashi: "益無きと為さず。", gendaigo: "無益だとはしない（＝有益だと思う）。" },
             { id: 192, kuhou: "禁止(不復)", hakubun: "不復窺漢道。", kakikudashi: "復た漢の道を窺はず。", gendaigo: "二度と漢の領地をうかがうことはなかった。" },
             { id: 193, kuhou: "選択(A乎B乎)", hakubun: "為我乎、為君乎。", kakikudashi: "我が為にか、君の為にか。", gendaigo: "私の為か、君主の為か。" },
