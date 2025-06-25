@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>漢文句法クイズチャレンジ【10問ランダム版】</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+        }
+        .font-serif {
+            font-family: 'Noto Serif JP', serif;
+        }
+        #hakubun-text {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            white-space: nowrap;
+        }
+        .feedback-correct {
+            color: #16a34a; /* green-600 */
+        }
+        .feedback-incorrect {
+            color: #dc2626; /* red-600 */
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 flex items-center justify-center min-h-screen">
+
+    <div id="quiz-container" class="w-full max-w-2xl mx-auto bg-white rounded-xl shadow-2xl p-6 md:p-8">
+
+        <!-- スタート画面 -->
+        <div id="start-screen">
+            <h1 class="text-3xl md:text-4xl font-bold text-center mb-4 text-slate-900">漢文句法クイズチャレンジ</h1>
+            <p class="text-center text-slate-600 mb-8">全200問の中からランダムで10問が出題されます。準備ができたら下のボタンを押してください。</p>
+            <button id="start-button" class="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors text-lg">
+                10問クイズを開始する
+            </button>
+        </div>
+
+        <!-- クイズ画面 -->
+        <div id="quiz-screen" class="hidden">
+            <div class="flex justify-between items-center mb-6">
+                <div id="question-counter" class="text-lg font-bold text-slate-700"></div>
+                <div id="score-counter" class="text-lg font-bold text-green-600"></div>
+            </div>
+            
+            <div class="bg-slate-50 border-r-4 border-slate-200 p-6 rounded-lg mb-6 flex justify-center items-center h-40">
+                <p id="hakubun-text" class="text-4xl font-serif text-slate-900"></p>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label for="kakikudashi-input" class="block mb-1 font-bold text-slate-700">書き下し文</label>
+                    <textarea id="kakikudashi-input" rows="2" class="w-full border-2 border-slate-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="書き下し文をここに入力"></textarea>
+                </div>
+                <div>
+                    <label for="gendaigo-input" class="block mb-1 font-bold text-slate-700">現代語訳（参考）</label>
+                    <textarea id="gendaigo-input" rows="2" class="w-full border-2 border-slate-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="現代語訳をここに入力（判定には含みません）"></textarea>
+                </div>
+            </div>
+
+            <div id="feedback" class="mt-4 text-center font-bold text-lg min-h-[28px]"></div>
+            
+            <div class="mt-6 flex flex-col md:flex-row gap-4">
+                <button id="check-button" class="w-full md:w-1/2 bg-green-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700 transition-colors">解答を判定</button>
+                <button id="next-button" class="w-full md:w-1/2 bg-slate-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-slate-600 transition-colors" disabled>次の問題へ</button>
+            </div>
+            
+            <div id="answer-display" class="hidden mt-6 p-4 bg-yellow-100 border-l-4 border-yellow-500 rounded-lg">
+                <h4 class="font-bold text-yellow-800">正解</h4>
+                <p class="text-yellow-700"><strong class="font-bold">句法：</strong> <span id="answer-kuhou"></span></p>
+                <p class="text-yellow-700"><strong class="font-bold">書き下し文：</strong> <span id="answer-kakikudashi"></span></p>
+                <p class="text-yellow-700"><strong class="font-bold">現代語訳：</strong> <span id="answer-gendaigo"></span></p>
+            </div>
+        </div>
+
+        <!-- 結果画面 -->
+        <div id="result-screen" class="hidden text-center">
+            <h2 class="text-3xl font-bold mb-4 text-slate-900">クイズ終了！</h2>
+            <p class="text-xl text-slate-600 mb-6">お疲れ様でした。</p>
+            <div class="text-5xl font-bold mb-8" id="final-score"></div>
+            <p id="result-message" class="text-lg mb-8"></p>
+            <button id="restart-button" class="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors text-lg">
+                もう一度挑戦する
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // --- データの準備 ---
+        const questions = [
+            // 第1回
+            { id: 1, kuhou: "否定", hakubun: "君子不争。", kakikudashi: "君子は争はず。", gendaigo: "徳のある立派な人は争わない。" },
+            { id: 2, kuhou: "疑問", hakubun: "誰能為此。", kakikudashi: "誰か能く此を為さん。", gendaigo: "誰がこれをできるだろうか。" },
+            { id: 3, kuhou: "反語", hakubun: "燕雀安知鴻鵠之志哉。", kakikudashi: "燕雀安くんぞ鴻鵠の志を知らんや。", gendaigo: "ツバメやスズメにどうしてオオトリの志が分かろうか、いや分かりはしない。" },
+            { id: 4, kuhou: "使役", hakubun: "項王使人問。", kakikudashi: "項王人をして問はしむ。", gendaigo: "項王は（家来に）人をやって質問させた。" },
+            { id: 5, kuhou: "受身", hakubun: "虎為猟者所殺。", kakikudashi: "虎の猟者に殺さるる所と為る。", gendaigo: "虎は猟師に殺された。" },
+            { id: 6, kuhou: "可能", hakubun: "可以為師矣。", kakikudashi: "以て師と為るべし。", gendaigo: "（これを手本として）師とすることができる。" },
+            { id: 7, kuhou: "比較", hakubun: "苛政猛於虎也。", kakikudashi: "苛政は虎よりも猛なり。", gendaigo: "過酷な政治は虎よりもどう猛である。" },
+            { id: 8, kuhou: "仮定", hakubun: "若如公言、則四方之民望之矣。", kakikudashi: "若し公の言の如くんば、則ち四方の民之を望まん。", gendaigo: "もしあなたのお言葉通りなら、四方の民は（あなたを）待ち望むでしょう。" },
+            { id: 9, kuhou: "限定", hakubun: "唯我独尊。", kakikudashi: "唯だ我独り尊し。", gendaigo: "ただ私だけが尊い。" },
+            { id: 10, kuhou: "再読文字", hakubun: "臣将奏之。", kakikudashi: "臣将に之を奏せんとす。", gendaigo: "私めは今にもこのことを君主に申し上げようとしております。" },
+            // 第2回
+            { id: 11, kuhou: "禁止", hakubun: "過則勿憚改。", kakikudashi: "過てば則ち改むるに憚ること勿かれ。", gendaigo: "過ちを犯したならば、改めることをためらってはならない。" },
+            { id: 12, kuhou: "二重否定", hakubun: "不可不知也。", kakikudashi: "知らざるべからずなり。", gendaigo: "知らないわけにはいかないのだ。" },
+            { id: 13, kuhou: "選択", hakubun: "寧為鶏口、無為牛後。", kakikudashi: "寧ろ鶏口と為るとも、牛後と為る無かれ。", gendaigo: "いっそ鶏の口（小さな団体の長）となっても、牛の尻（大きな団体の末端）となるな。" },
+            { id: 14, kuhou: "抑揚", hakubun: "死馬且買之、況生者乎。", kakikudashi: "死馬すら且つ之を買ふ、況んや生者をや。", gendaigo: "死んだ馬でさえ買うのだ、まして生きている馬ならなおさらだ。" },
+            { id: 15, kuhou: "累加", hakubun: "子亦無聊耳。", kakikudashi: "子も亦た無聊なるのみ。", gendaigo: "あなたもまた退屈なだけでしょう。" },
+            { id: 16, kuhou: "願望", hakubun: "願大王急渡。", kakikudashi: "願はくは大王急ぎ渡れ。", gendaigo: "お願いです、大王、急いで（川を）お渡りください。" },
+            { id: 17, kuhou: "詠嘆", hakubun: "何其亡也。", kakikudashi: "何ぞ其れ亡ぶるや。", gendaigo: "なんとまあ滅んでしまったことよ。" },
+            { id: 18, kuhou: "比況", hakubun: "光陰如箭。", kakikudashi: "光陰箭の如し。", gendaigo: "月日の経つのは矢のようである。" },
+            { id: 19, kuhou: "詠嘆", hakubun: "嗚呼、天之亡我。", kakikudashi: "嗚呼、天の我を亡ぼすか。", gendaigo: "ああ、天が私を滅ぼすのか。" },
+            { id: 20, kuhou: "再読文字", hakubun: "君未嘗語大夫。", kakikudashi: "君未だ嘗て大夫に語らず。", gendaigo: "あなたはまだ一度も家老と話したことがない。" },
+            // 第3回
+            { id: 21, kuhou: "部分否定", hakubun: "不必皆聖。", kakikudashi: "必ずしも皆聖人ならず。", gendaigo: "必ずしも皆が聖人であるとは限らない。" },
+            { id: 22, kuhou: "反語(豈)", hakubun: "豈無父母乎。", kakikudashi: "豈に父母無からんや。", gendaigo: "どうして父母がいないことがあろうか、いやいるはずだ。" },
+            { id: 23, kuhou: "受身(見)", hakubun: "吾常見笑於大方之家。", kakikudashi: "吾常に大方の家に笑はる。", gendaigo: "私はいつも専門家たちに笑われる。" },
+            { id: 24, kuhou: "使役(令)", hakubun: "令我百戦百勝。", kakikudashi: "我をして百戦百勝せしむ。", gendaigo: "私に百回戦って百回勝たせる。" },
+            { id: 25, kuhou: "不可能(不得)", hakubun: "由不得其死然。", kakikudashi: "由は其の死然たるを得ず。", gendaigo: "由（子路）はまっとうな死に方をすることができないだろう。" },
+            { id: 26, kuhou: "選択(与A孰若B)", hakubun: "与其有誉於前、孰若無毀於後。", kakikudashi: "其の前に誉れ有るよりは、後の毀り無きに孰若。", gendaigo: "人の前でほめられるより、後でそしられないのとではどちらが良いか（後でそしられない方が良い）。" },
+            { id: 27, kuhou: "仮定(縦)", hakubun: "縦彼不言、籍独不愧於心乎。", kakikudashi: "縦ひ彼言はずとも、籍独り心に愧ぢざらんや。", gendaigo: "たとえ彼らが（何も）言わなくても、私（項籍）一人が心に恥じないでいられようか、いや恥じずにはいられない。" },
+            { id: 28, kuhou: "願望(冀)", hakubun: "冀君之察吾有道之言也。", kakikudashi: "冀はくは君の吾が有道の言を察せんことを。", gendaigo: "どうかあなたが私の道理にかなった言葉をお察しくださることを願います。" },
+            { id: 29, kuhou: "比況(猶)", hakubun: "過猶不及。", kakikudashi: "過ぎたるは猶ほ及ばざるがごとし。", gendaigo: "やり過ぎることは、やり足りないことと同じくらい良くない。" },
+            { id: 30, kuhou: "再読文字(当)", hakubun: "及時当勉励。", kakikudashi: "時に及びて当に勉励すべし。", gendaigo: "時機を逃さず当然努力すべきである。" },
+            // 第4回
+            { id: 31, kuhou: "全面否定(莫)", hakubun: "天下莫能与之争。", kakikudashi: "天下能く之と争ふ莫し。", gendaigo: "天下に彼と争うことができる者は誰もいない。" },
+            { id: 32, kuhou: "反語(勧告)", hakubun: "客何為不去。", kakikudashi: "客何為れぞ去らざる。", gendaigo: "あなたはどうして立ち去らないのか、立ち去ればよいのに。" },
+            { id: 33, kuhou: "受身(被)", hakubun: "信而見疑、忠而被謗。", kakikudashi: "信にして疑はれ、忠にして謗らる。", gendaigo: "誠実であっても疑われ、忠義を尽くしてもそしられる。" },
+            { id: 34, kuhou: "可能(能)", hakubun: "孰能無過。", kakikudashi: "孰か能く過ち無からんや。", gendaigo: "誰が過ちのないことなどあろうか、いや誰でも過ちはある。" },
+            { id: 35, kuhou: "限定(徒)", hakubun: "徒聞其語、未見其人。", kakikudashi: "徒だ其の語を聞くも、未だ其の人を見ず。", gendaigo: "ただその言葉を聞くだけで、まだその人に会ったことはない。" },
+            { id: 36, kuhou: "累加(復)", hakubun: "不復出焉。", kakikudashi: "復た焉に出でず。", gendaigo: "二度とそこから外へ出なかった。" },
+            { id: 37, kuhou: "抑揚(尚)", hakubun: "臣尚不敢読此書、況於経書乎。", kakikudashi: "臣尚ほ敢へて此の書を読まず、況んや経書に於いてをや。", gendaigo: "私でさえこの書物を読む勇気がない、まして（難解な）経典についてはなおさらだ。" },
+            { id: 38, kuhou: "詠嘆(乎)", hakubun: "危乎高哉。", kakikudashi: "危ふきかな高きかな。", gendaigo: "なんと危険でなんと高いことか。" },
+            { id: 39, kuhou: "禁止(毋)", hakubun: "己所不欲、毋施於人。", kakikudashi: "己の欲せざる所、人に施すこと毋かれ。", gendaigo: "自分がしてほしくないことを、他人にしてはならない。" },
+            { id: 40, kuhou: "再読文字(宜)", hakubun: "宜急追之。", kakikudashi: "宜しく急に之を追ふべし。", gendaigo: "急いで彼らを追うのがよい。" },
+            // 第5回
+            { id: 41, kuhou: "否定(非)", hakubun: "人非聖人。", kakikudashi: "人は聖人にあらず。", gendaigo: "人は聖人ではない。" },
+            { id: 42, kuhou: "疑問(何処)", hakubun: "先生何処也。", kakikudashi: "先生何処にか在る。", gendaigo: "先生はどこにいらっしゃるのですか。" },
+            { id: 43, kuhou: "反語(不亦〜乎)", hakubun: "不亦楽乎。", kakikudashi: "亦た楽しからずや。", gendaigo: "またなんと楽しいことではないか。" },
+            { id: 44, kuhou: "使役(教)", hakubun: "教韓信分兵。", kakikudashi: "韓信に兵を分かたしむ。", gendaigo: "韓信に兵を分けて率いさせる。" },
+            { id: 45, kuhou: "可能(足)", hakubun: "不足為道也。", kakikudashi: "道と為すに足らず。", gendaigo: "取り上げて言うほどの価値もない。" },
+            { id: 46, kuhou: "比較(不如)", hakubun: "百聞不如一見。", kakikudashi: "百聞は一見に如かず。", gendaigo: "百回聞くことは一回見る事には及ばない。" },
+            { id: 47, kuhou: "仮定(雖)", hakubun: "雖有明君、不能賞無功。", kakikudashi: "明君有りと雖も、無功を賞すること能はず。", gendaigo: "たとえ優れた君主がいたとしても、功績のない者にほうびを与えることはできない。" },
+            { id: 48, kuhou: "限定(但)", hakubun: "不聞機杼声、但聞女歎息。", kakikudashi: "機杼の声を聞かず、但だ女の歎息を聞く。", gendaigo: "機織りの音は聞こえず、ただ娘のため息が聞こえるだけだ。" },
+            { id: 49, kuhou: "受身(為〜所)", hakubun: "身為漢軍所虜。", kakikudashi: "身は漢軍の虜とする所と為る。", gendaigo: "自身は漢軍の捕虜となった。" },
+            { id: 50, kuhou: "再読文字(須)", hakubun: "須早入関。", kakikudashi: "須く早く関に入るべし。", gendaigo: "ぜひとも早く（函谷）関に入るべきだ。" },
+            // 第6回
+            { id: 51, kuhou: "二重否定(非不)", hakubun: "非不説子之道。", kakikudashi: "子の道を説ばざるに非ず。", gendaigo: "あなたの道を喜ばないわけではない。" },
+            { id: 52, kuhou: "禁止(莫)", hakubun: "莫道人之短。", kakikudashi: "人の短を道ふこと莫かれ。", gendaigo: "他人の短所を言ってはならない。" },
+            { id: 53, kuhou: "選択(A与B孰)", hakubun: "我与爾孰愈。", kakikudashi: "我と爾と孰れか愈れる。", gendaigo: "私とあなたとではどちらが優れているか。" },
+            { id: 54, kuhou: "使役(遣)", hakubun: "遣使者黄金千斤。", kakikudashi: "使者をして黄金千斤を遺らしむ。", gendaigo: "使いの者に黄金千斤を贈らせる。" },
+            { id: 55, kuhou: "累加(又)", hakubun: "又有賢俊者。", kakikudashi: "又賢俊なる者有り。", gendaigo: "さらに賢く優れた者がいた。" },
+            { id: 56, kuhou: "願望(請)", hakubun: "請為王言楽。", kakikudashi: "請ふ王の為に楽を言はん。", gendaigo: "どうか王様のために音楽について語らせてください。" },
+            { id: 57, kuhou: "詠嘆(哉)", hakubun: "善哉言乎。", kakikudashi: "善きかな言や。", gendaigo: "なんと素晴らしい言葉だろうか。" },
+            { id: 58, kuhou: "比況(若)", hakubun: "君子之交淡若水。", kakikudashi: "君子の交はりは淡きこと水の若し。", gendaigo: "君子の交際は、水のようにあっさりしている。" },
+            { id: 59, kuhou: "詠嘆(嗚呼)", hakubun: "嗚呼哀哉。", kakikudashi: "嗚呼哀しいかな。", gendaigo: "ああ、なんと悲しいことか。" },
+            { id: 60, kuhou: "再読文字(蓋)", hakubun: "蓋亦反其本矣。", kakikudashi: "蓋し亦其の本に反らんや。", gendaigo: "どうしてその根本に立ち返らないのか、立ち返ればよい。" },
+            // 第7回
+            { id: 61, kuhou: "否定(無)", hakubun: "人無遠慮、必有近憂。", kakikudashi: "人にして遠慮無ければ、必ず近き憂ひ有り。", gendaigo: "先々のことを考えなければ、必ず身近に心配事が起こる。" },
+            { id: 62, kuhou: "疑問(何以)", hakubun: "何以知其然乎。", kakikudashi: "何を以て其の然るを知るや。", gendaigo: "どうしてそうであると分かるのか。" },
+            { id: 63, kuhou: "使役(聴)", hakubun: "聴其自然。", kakikudashi: "其の自然に聴す。", gendaigo: "その自然のままに任せる。" },
+            { id: 64, kuhou: "可能(克)", hakubun: "克定天下。", kakikudashi: "克く天下を定む。", gendaigo: "うまく天下を平定することができる。" },
+            { id: 65, kuhou: "比較(A...不如B...)", hakubun: "行百里者、半於九十。", kakikudashi: "百里を行く者は、九十を半ばとす。", gendaigo: "百里の道のりも、九十里まで来てようやく半分と心得るべきだ。" },
+            { id: 66, kuhou: "仮定(使)", hakubun: "使我有大罪、則天必罰我。", kakikudashi: "使し我に大罪有らば、則ち天必ず我を罰せん。", gendaigo: "もし私に大罪があるならば、天が必ず私を罰するだろう。" },
+            { id: 67, kuhou: "限定(耳)", hakubun: "聞道百、以為莫己若者、我之謂也。", kakikudashi: "道の百なるを聞き、以て己に若くは莫しと為す者は、我の謂ひなり。", gendaigo: "多くの道理を聞いて、自分に及ぶ者はいないと思っている者とは、私のことだ。" },
+            { id: 68, kuhou: "抑揚(すら...況んや...をや)", hakubun: "王侯将相、寧有種乎。", kakikudashi: "王侯将相、寧くんぞ種有らんや。", gendaigo: "王・侯・将軍・宰相といった高貴な身分は、どうして（生まれつきの）血筋があろうか、いやない。" },
+            { id: 69, kuhou: "比況(譬)", hakubun: "譬如積土成山。", kakikudashi: "譬へば土を積んで山を成すがごとし。", gendaigo: "たとえば土を積んで山を作るようなものだ。" },
+            { id: 70, kuhou: "再読文字(盍)", hakubun: "子盍言之。", kakikudashi: "子盍ぞ之を言はざる。", gendaigo: "あなたはどうしてそのことを言わないのか、言えばよいのに。" },
+            // 第8回
+            { id: 71, kuhou: "否定(無A無B)", hakubun: "無貴無賤、無長無少。", kakikudashi: "貴と無く賤と無く、長と無く少と無く。", gendaigo: "身分が高い者も低い者もなく、年長者も年少者もない。" },
+            { id: 72, kuhou: "疑問(安)", hakubun: "君安之。", kakikudashi: "君安くにか之く。", gendaigo: "あなたはどこへ行くのですか。" },
+            { id: 73, kuhou: "二重否定(無不)", hakubun: "無不為之。", kakikudashi: "之を為さざるは無し。", gendaigo: "これをしないことはない（必ずこれをする）。" },
+            { id: 74, kuhou: "使役(俾)", hakubun: "俾万民安。", kakikudashi: "万民をして安んぜしむ。", gendaigo: "すべての人民を安心させる。" },
+            { id: 75, kuhou: "受身(為)", hakubun: "為人所笑。", kakikudashi: "人の笑ふ所と為る。", gendaigo: "人に笑われる。" },
+            { id: 76, kuhou: "比較(孰与)", hakubun: "我孰与城北徐公美。", kakikudashi: "我と城北の徐公と孰れか美なる。", gendaigo: "私と城北の徐公とでは、どちらが美しいか。" },
+            { id: 77, kuhou: "仮定(誠)", hakubun: "誠能聴臣、莫若与之絶。", kakikudashi: "誠に能く臣に聴かば、之と絶つに若くは莫し。", gendaigo: "もし本当に私の言うことをお聞き入れくださるなら、あれ（秦）と国交を断絶するに越したことはありません。" },
+            { id: 78, kuhou: "限定(直)", hakubun: "直百歩耳。", kakikudashi: "直だ百歩のみ。", gendaigo: "わずか百歩にすぎない。" },
+            { id: 79, kuhou: "累加(亦)", hakubun: "死亦我所悪。", kakikudashi: "死も亦た我が悪む所なり。", gendaigo: "死もまた私の憎むところである。" },
+            { id: 80, kuhou: "再読文字(応)", hakubun: "応知故郷事。", kakikudashi: "応に故郷の事を知るべし。", gendaigo: "きっと故郷の事を分かってくれるにちがいない。" },
+            // 第9回
+            { id: 81, kuhou: "二重否定(無A不B)", hakubun: "無友不如己者。", kakikudashi: "己に如かざる者を友とすること無かれ。", gendaigo: "自分に及ばない者を友人とするな。" },
+            { id: 82, kuhou: "疑問(何則)", hakubun: "是何異於刺人而殺之。", kakikudashi: "是れ人を刺して之を殺すに何ぞ異ならん。", gendaigo: "これは、人を刺して殺すのと、どうして違いがあろうか。" },
+            { id: 83, kuhou: "反語(悪乎)", hakubun: "君子去仁、悪乎成名。", kakikudashi: "君子仁を去りて、悪くんぞ名を成さん。", gendaigo: "君子が仁を捨てて、どうして名声をあげることができようか、いやできない。" },
+            { id: 84, kuhou: "使役(命)", hakubun: "命曰殺之。", kakikudashi: "命じて曰はく、「之を殺せ」と。", gendaigo: "（王が）命じて言うことには、「そいつを殺せ」と。" },
+            { id: 85, kuhou: "受身(る・らる)", hakubun: "不見納。", kakikudashi: "納れられず。", gendaigo: "受け入れられない。" },
+            { id: 86, kuhou: "不可能(不能)", hakubun: "項羽不能有天下。", kakikudashi: "項羽天下を有つこと能はず。", gendaigo: "項羽は天下を所有することができなかった。" },
+            { id: 87, kuhou: "比較(莫如)", hakubun: "知子莫如父。", kakikudashi: "子を知るは父に如くは莫し。", gendaigo: "子のことを知っているという点では、父親に及ぶ者はいない。" },
+            { id: 88, kuhou: "仮定(苟)", hakubun: "苟富貴、無相忘。", kakikudashi: "苟しくも富貴ならば、相忘るること無からん。", gendaigo: "もしも富貴の身になったとしても、お互いに忘れないようにしよう。" },
+            { id: 89, kuhou: "限定(唯)", hakubun: "唯仁者宜在高位。", kakikudashi: "唯だ仁者のみ高位に在るに宜し。", gendaigo: "ただ仁徳のある者だけが高い地位にいるのがふさわしい。" },
+            { id: 90, kuhou: "再読文字(且)", hakubun: "年且暮。", kakikudashi: "年且に暮れんとす。", gendaigo: "歳がまさに暮れようとしている。" },
+            // 第10回
+            { id: 91, kuhou: "否定(無所)", hakubun: "無所不為。", kakikudashi: "為さざる所無し。", gendaigo: "しないことはない（どんなことでもする）。" },
+            { id: 92, kuhou: "疑問(奚)", hakubun: "子奚不為政。", kakikudashi: "子奚ぞ政を為さざる。", gendaigo: "あなたはなぜ政治をしないのですか。" },
+            { id: 93, kuhou: "反語(何〜為)", hakubun: "何為撃我。", kakikudashi: "何為れぞ我を撃つ。", gendaigo: "どうして私を撃つのか、撃つ必要はないのに。" },
+            { id: 94, kuhou: "使役(使)", hakubun: "乃使蒙恬北築長城。", kakikudashi: "乃ち蒙恬をして北のかた長城を築かしむ。", gendaigo: "そこで蒙恬に命じて北方に長城を築かせた。" },
+            { id: 95, kuhou: "受身(〜ところとなる)", hakubun: "為敵所擒。", kakikudashi: "敵の擒ふる所と為る。", gendaigo: "敵の捕虜となる。" },
+            { id: 96, kuhou: "選択(A乎、B乎)", hakubun: "求之乎、抑与之乎。", kakikudashi: "之を求めたるか、抑も之を与へたるか。", gendaigo: "（先生のあの地位は）自ら求めたものか、それとも（誰かが）お与えになったものか。" },
+            { id: 97, kuhou: "仮定(微)", hakubun: "微管仲、吾其被髪左衽矣。", kakikudashi: "管仲微かりせば、吾其れ髪を被りて衽を左にせん。", gendaigo: "もし管仲がいなかったならば、私はきっと異民族の風習に従っていただろう。" },
+            { id: 98, kuhou: "願望(幸)", hakubun: "幸聴寡人之言。", kakikudashi: "幸に寡人の言を聴け。", gendaigo: "どうか私の言葉を聞いてほしい。" },
+            { id: 99, kuhou: "比較(孰与)", hakubun: "功孰与高帝。", kakikudashi: "功は高帝と孰れぞ。", gendaigo: "功績は（私と）高祖とどちらが大きいか。" },
+            { id: 100, kuhou: "再読文字/二重否定", hakubun: "未嘗不嘆息痛恨。", kakikudashi: "未だ嘗て嘆息痛恨せずんばあらず。", gendaigo: "（桓帝・霊帝のことを思うと）今まで嘆き悲しみ、残念に思わないことはなかった。" },
+            // 第11回
+            { id: 101, kuhou: "否定(無敢)", hakubun: "無敢直言。", kakikudashi: "敢へて直言する無し。", gendaigo: "だれもあえて直接的な言葉で諫めようとしない。" },
+            { id: 102, kuhou: "反語(安...乎)", hakubun: "安能以此知之乎。", kakikudashi: "安くんぞ此を以て之を知るや。", gendaigo: "どうしてこれによってそのことを知ることができようか、いやできない。" },
+            { id: 103, kuhou: "受身(為...所)", hakubun: "不為酒困。", kakikudashi: "酒に困しまれず。", gendaigo: "酒のために苦しめられることがない。" },
+            { id: 104, kuhou: "使役(令)", hakubun: "令其僕行。", kakikudashi: "其の僕をして行かしむ。", gendaigo: "そのしもべに行かせた。" },
+            { id: 105, kuhou: "可能(克)", hakubun: "克己復礼為仁。", kakikudashi: "己に克ちて礼に復るを仁と為す。", gendaigo: "私情に打ち勝って礼に立ち返ることを仁とする。" },
+            { id: 106, kuhou: "比較(...於)", hakubun: "青出於藍。", kakikudashi: "青は藍より出づ。", gendaigo: "青色の染料は藍という草から取る（弟子が師よりも優れることのたとえ）。" },
+            { id: 107, kuhou: "仮定(雖)", hakubun: "雖有百万人、亦無所用之。", kakikudashi: "百万の人有りと雖も、亦た之を用うる所無し。", gendaigo: "たとえ百万の兵がいたとしても、やはりその使い道がない。" },
+            { id: 108, kuhou: "限定(非独)", hakubun: "非独百姓為然。", kakikudashi: "独り百姓のみ然りと為すに非ず。", gendaigo: "ただ人民だけがそうなのではない。" },
+            { id: 109, kuhou: "抑揚", hakubun: "管仲且知礼、況君乎。", kakikudashi: "管仲すら且つ礼を知る、況んや君をや。", gendaigo: "管仲でさえ礼をわきまえている、まして君主であるあなたが知らないはずはない。" },
+            { id: 110, kuhou: "再読文字(将)", hakubun: "天将降大任於是人也。", kakikudashi: "天将に大任を是の人に降さんとするなり。", gendaigo: "天がこの人に重大な任務を与えようとしているのだ。" },
+            // 第12回
+            { id: 111, kuhou: "二重否定(非不)", hakubun: "非不欲也、力不足也。", kakikudashi: "欲せざるに非ざるなり、力足らざるなり。", gendaigo: "望んでいないわけではない、力が足りないのだ。" },
+            { id: 112, kuhou: "禁止(勿)", hakubun: "勿以悪小而為之。", kakikudashi: "悪の小なるを以て之を為すこと勿かれ。", gendaigo: "悪事が小さいからといって、それをしてはならない。" },
+            { id: 113, kuhou: "選択(寧...不...)", hakubun: "寧為玉砕、不為瓦全。", kakikudashi: "寧ろ玉砕と為るとも、瓦全と為るなかれ。", gendaigo: "いっそ玉となって砕け散っても、瓦のまま完全であるな。" },
+            { id: 114, kuhou: "抑揚(尚...況...)", hakubun: "僕尚終身、而況太子乎。", kakikudashi: "僕すら尚ほ身を終へん、而るを況んや太子をや。", gendaigo: "私のような者でさえ（復讐のために）命を終えようとしている、まして皇太子ならなおさらだ。" },
+            { id: 115, kuhou: "累加(亦)", hakubun: "死亦我所悪也。", kakikudashi: "死も亦た我が悪む所なり。", gendaigo: "死もまた私の憎むところである。" },
+            { id: 116, kuhou: "願望(願)", hakubun: "願君留意。", kakikudashi: "願はくは君意を留めよ。", gendaigo: "どうかあなた様には心に留めてください。" },
+            { id: 117, kuhou: "詠嘆(何為)", hakubun: "何為其然也。", kakikudashi: "何為れぞ其れ然るや。", gendaigo: "なんとまあそれはそのようであることか。" },
+            { id: 118, kuhou: "比況(如)", hakubun: "視死如帰。", kakikudashi: "死を視ること帰するがごとし。", gendaigo: "死ぬことを故郷へ帰るように（なんとも思わず）見る。" },
+            { id: 119, kuhou: "比較", hakubun: "功孰与高帝。", kakikudashi: "功は高帝と孰れぞ。", gendaigo: "功績は（私と）高祖とどちらが大きいか。" },
+            { id: 120, kuhou: "再読文字(未)", hakubun: "未聞好学者也。", kakikudashi: "未だ学を好む者を聞かざるなり。", gendaigo: "まだ学問を好む者を聞いたことがない。" },
+            // 第13回
+            { id: 121, kuhou: "否定(無A不B)", hakubun: "無求備於一人。", kakikudashi: "一人の人に備はらんことを求むること無し。", gendaigo: "一人の人間に、全てが備わっていることを求めてはいけない。" },
+            { id: 122, kuhou: "反語(何以)", hakubun: "何以報徳。", kakikudashi: "何を以て徳に報いん。", gendaigo: "何によって（受けた）恩に報いたらよいのか、いや報いるものはない。" },
+            { id: 123, kuhou: "受身(見)", hakubun: "吾常見欺於長者。", kakikudashi: "吾常に長者に欺かる。", gendaigo: "私はいつも年長者にだまされる。" },
+            { id: 124, kuhou: "使役(教)", hakubun: "教我以道。", kakikudashi: "道を以て我に教ふ。", gendaigo: "道理を私に教えさせる。" },
+            { id: 125, kuhou: "可能(得)", hakubun: "得無悔乎。", kakikudashi: "悔い無きを得んや。", gendaigo: "後悔しないことができようか、いやできない。" },
+            { id: 126, kuhou: "比較(莫〜於...)", hakubun: "禍莫大於不知足。", kakikudashi: "禍は足るを知らざるより大なるは莫し。", gendaigo: "災難は、満足することを知らないことより大きいものはない。" },
+            { id: 127, kuhou: "仮定(如)", hakubun: "如虎添翼。", kakikudashi: "虎に翼を添ふるがごとし。", gendaigo: "まるで虎に翼をつけたようだ。" },
+            { id: 128, kuhou: "限定(独)", hakubun: "斉独無人乎。", kakikudashi: "斉独り人無からんや。", gendaigo: "斉の国だけ、どうして人材がいないことがあろうか、いやいるはずだ。" },
+            { id: 129, kuhou: "詠嘆(嗚呼)", hakubun: "嗚呼、子之心刻矣。", kakikudashi: "嗚呼、子の心は刻なり。", gendaigo: "ああ、あなたの心はなんと残酷なことか。" },
+            { id: 130, kuhou: "再読文字(当)", hakubun: "当知此意。", kakikudashi: "当に此の意を知るべし。", gendaigo: "当然この意味を知っておくべきだ。" },
+            // 第14回
+            { id: 131, kuhou: "二重否定(非無)", hakubun: "非無賢人也。", kakikudashi: "賢人無きに非ざるなり。", gendaigo: "賢人がいないわけではない。" },
+            { id: 132, kuhou: "禁止(不)", hakubun: "不入虎穴、不得虎子。", kakikudashi: "虎穴に入らずんば、虎子を得ず。", gendaigo: "虎の棲む穴に入らなければ、虎の子を得ることはできない。" },
+            { id: 133, kuhou: "選択(孰与)", hakubun: "我孰与君少。", kakikudashi: "我と君と孰れか少なる。", gendaigo: "私とあなたではどちらが若いか。" },
+            { id: 134, kuhou: "使役(聴)", hakubun: "聴人以説。", kakikudashi: "人の説くを以て聴く。", gendaigo: "人が説き伏せるのに任せる。" },
+            { id: 135, kuhou: "累加(兼)", hakubun: "非兼天下之人。", kakikudashi: "天下の人を兼ぬるに非ず。", gendaigo: "天下の人々を併せ持つというものではない。" },
+            { id: 136, kuhou: "願望(庶幾)", hakubun: "庶幾無罪。", kakikudashi: "罪無からんことを庶幾ふ。", gendaigo: "罪がないことをどうかお願いする。" },
+            { id: 137, kuhou: "詠嘆(何)", hakubun: "何其壮也。", kakikudashi: "何ぞ其れ壮なるや。", gendaigo: "なんとまあそれは勇ましいことか。" },
+            { id: 138, kuhou: "比況(〜の若し)", hakubun: "対人若氷。", kakikudashi: "人に対すること氷の若し。", gendaigo: "人に対する態度は氷のように冷たい。" },
+            { id: 139, kuhou: "受身(為)", hakubun: "不為物役。", kakikudashi: "物に役せられず。", gendaigo: "（欲望などの）対象に支配されない。" },
+            { id: 140, kuhou: "再読文字(盍)", hakubun: "子盍為我言之。", kakikudashi: "子盍ぞ我が為に之を言はざる。", gendaigo: "あなたはなぜ私のためにそのことを言ってくれないのか、言ってくれればよいのに。" },
+            // 第15回
+            { id: 141, kuhou: "否定(弗)", hakubun: "吾弗能已。", kakikudashi: "吾能く已むこと弗はざるなり。", gendaigo: "私は（学ぶことを）やめることができないのだ。" },
+            { id: 142, kuhou: "疑問(何故)", hakubun: "君実有功、何故不言。", kakikudashi: "君実に功有り、何故ぞ言はざる。", gendaigo: "あなたは本当に功績があるのに、どうしてそれを言わないのか。" },
+            { id: 143, kuhou: "反語(何)", hakubun: "何為泣。", kakikudashi: "何為れぞ泣く。", gendaigo: "どうして泣くのか、いや泣く必要はない。" },
+            { id: 144, kuhou: "使役(説)", hakubun: "説楚以従。", kakikudashi: "楚に説きて従はしむ。", gendaigo: "楚の国に説得して、（合従策に）従わせる。" },
+            { id: 145, kuhou: "受身(被)", hakubun: "為親所怒。", kakikudashi: "親の怒る所と為る。", gendaigo: "親に怒られる。" },
+            { id: 146, kuhou: "比較(孰若)", hakubun: "与其従辟人之士也、孰若従辟世之士哉。", kakikudashi: "其の人を辟くるの士に従はんよりは、世を辟くるの士に従ふに孰若。", gendaigo: "（乱れた君主という特定の）人を避ける賢者に従うより、世の中そのものを避ける賢者に従う方がどれだけ良いだろうか。" },
+            { id: 147, kuhou: "仮定(誠)", hakubun: "誠如是也、民帰之、由水之就下。", kakikudashi: "誠に是くの如くならば、民の之に帰するは、水の低きに就くがごとし。", gendaigo: "もし本当にこのようであれば、民がその人に従うのは、水が低いところに流れていくようなものである。" },
+            { id: 148, kuhou: "限定(特)", hakubun: "特与嬰児戯耳。", kakikudashi: "特だ嬰児と戯るるのみ。", gendaigo: "ただ子供とふざけているだけだ。" },
+            { id: 149, kuhou: "詠嘆(猗)", hakubun: "猗歟休哉。", kakikudashi: "猗歟休なるかな。", gendaigo: "ああ、なんとすばらしいことか。" },
+            { id: 150, kuhou: "再読文字(蓋)", hakubun: "蓋莫如是。", kakikudashi: "蓋し是くの如きは莫し。", gendaigo: "思うにこれほどのものはないだろう。" },
+            // 第16回
+            { id: 151, kuhou: "二重否定(未嘗不)", hakubun: "未嘗不廃書而歎也。", kakikudashi: "未だ嘗て書を廃して嘆ぜずんばあらざるなり。", gendaigo: "（書物を読むたびに）いつも書物を手放して嘆かないことはなかった。" },
+            { id: 152, kuhou: "禁止(無)", hakubun: "無望其福。", kakikudashi: "其の福を望むこと無かれ。", gendaigo: "その幸福を望んではいけない。" },
+            { id: 153, kuhou: "選択(与其...寧...)", hakubun: "与其奢也、寧倹。", kakikudashi: "其の奢らんよりは、寧ろ倹なれ。", gendaigo: "（葬儀は）贅沢であるよりは、むしろ質素であるべきだ。" },
+            { id: 154, kuhou: "受身(見...於)", hakubun: "吾常見笑於大方之家。", kakikudashi: "吾常に大方の家に笑はる。", gendaigo: "私はいつも専門家たちに笑われる。" },
+            { id: 155, kuhou: "累加(又)", hakubun: "温故而知新、又可以為師矣。", kakikudashi: "故きを温めて新しきを知れば、又以て師と為るべし。", gendaigo: "古いことを研究して新しいことを知れば、さらにそれを手本として師とすることができる。" },
+            { id: 156, kuhou: "願望(請)", hakubun: "臣請奏其事。", kakikudashi: "臣請ふ其の事を奏さん。", gendaigo: "どうか私にその事を（君主に）奏上させてください。" },
+            { id: 157, kuhou: "詠嘆(嗟乎)", hakubun: "嗟乎、燕雀安知鴻鵠之志哉。", kakikudashi: "嗟乎、燕雀安くんぞ鴻鵠の志を知らんや。", gendaigo: "ああ、ツバメやスズメのような小鳥にどうしてオオトリやクグイのような大きな鳥の志が分かろうか、いや分かりはしない。" },
+            { id: 158, kuhou: "比況(猶)", hakubun: "雖有智者、猶不能知也。", kakikudashi: "智者有りと雖も、猶ほ知ること能はざるなり。", gendaigo: "たとえ知者がいたとしても、やはり知ることはできない。" },
+            { id: 159, kuhou: "仮定(向)", hakubun: "向使四君脩徳、則韓国必安。", kakikudashi: "向に四君をして徳を脩めしめば、則ち韓国必ず安からん。", gendaigo: "もし以前に四人の君主が徳を修めていたならば、韓国は必ず安泰だったであろうに。" },
+            { id: 160, kuhou: "再読文字(応)", hakubun: "応是天仙狂酔。", kakikudashi: "応に是れ天仙の狂酔なるべし。", gendaigo: "これはきっと天上の仙人がひどく酔っぱらっているのだろう。" },
+            // 第17回
+            { id: 161, kuhou: "否定(毋)", hakubun: "無偏無党。", kakikudashi: "偏無く党無し。", gendaigo: "（どちらにも）肩入れせず、徒党を組むこともない。" },
+            { id: 162, kuhou: "疑問(幾何)", hakubun: "其後幾何。", kakikudashi: "其の後幾何ぞ。", gendaigo: "それからどれくらいの時間が経ったか。" },
+            { id: 163, kuhou: "反語(何ぞや)", hakubun: "是何言也。", kakikudashi: "是れ何なる言ぞや。", gendaigo: "これは何という（ひどい）言葉だ。" },
+            { id: 164, kuhou: "使役(俾)", hakubun: "俾予靖而爾献。", kakikudashi: "予をして靖んじ爾をして献ぜしむ。", gendaigo: "私を安心させて、お前を（神に）捧げさせる。" },
+            { id: 165, kuhou: "可能(堪)", hakubun: "不堪其憂。", kakikudashi: "其の憂へに堪へず。", gendaigo: "その心配事に耐えられない。" },
+            { id: 166, kuhou: "比較(A...於B)", hakubun: "富与貴、是人之所欲也。", kakikudashi: "富と貴とは、是れ人の欲する所なり。", gendaigo: "富と高い地位は、誰もが欲しがるものである。" },
+            { id: 167, kuhou: "仮定(令)", hakubun: "令吾得常身、必殺此獠。", kakikudashi: "令ひ吾をして常の身を得せしめば、必ず此の獠を殺さん。", gendaigo: "もしも私に普通の体を得させてくれるなら、必ずこの未開の者どもを殺すのだが。" },
+            { id: 168, kuhou: "限定(直)", hakubun: "所載直米五斗。", kakikudashi: "載する所は直だ米五斗のみ。", gendaigo: "積んでいるものは、わずかに米五斗だけだ。" },
+            { id: 169, kuhou: "抑揚(〜すらいまだ...況や〜をや)", hakubun: "臣死且不避、卮酒安足辞。", kakikudashi: "臣死すら且つ避けず、卮酒安くんぞ辞するに足らん。", gendaigo: "私（のような者）は死でさえも避けはしない、どうして大杯の酒を断ることができようか、いやできない。" },
+            { id: 170, kuhou: "再読文字(須)", hakubun: "人生得意須尽歓。", kakikudashi: "人生意を得ては須からく歓を尽くすべし。", gendaigo: "人生で得意な時には、ぜひとも歓楽をきわめるべきだ。" },
+            // 第18回
+            { id: 171, kuhou: "二重否定(不為不)", hakubun: "不為不成。", kakikudashi: "為さざれば成らざるなり。", gendaigo: "しなければ成就しないものだ。" },
+            { id: 172, kuhou: "禁止(莫)", hakubun: "莫愁前路無知己。", kakikudashi: "愁ふること莫かれ前路に知己無きを。", gendaigo: "これからの道中に自分を理解してくれる人がいないことを心配することはない。" },
+            { id: 173, kuhou: "使役(命)", hakubun: "命駕、遂至其家。", kakikudashi: "駕を命じ、遂に其の家に至る。", gendaigo: "車を準備させて、とうとうその家に着いた。" },
+            { id: 174, kuhou: "受身(る・らる)", hakubun: "動必見独。", kakikudashi: "動けば必ず独り見ゆ。", gendaigo: "動くと必ず一人だけに見える。" },
+            { id: 175, kuhou: "累加(亦)", hakubun: "此亦人子也。", kakikudashi: "此れも亦人の子なり。", gendaigo: "これもまた人間の子である。" },
+            { id: 176, kuhou: "願望(幸)", hakubun: "幸勿復言。", kakikudashi: "幸に復た言ふ勿かれ。", gendaigo: "どうか二度と言わないでください。" },
+            { id: 177, kuhou: "詠嘆(也夫)", hakubun: "殆哉我也。", kakikudashi: "殆ふきかな我や。", gendaigo: "危ういなあ、私は。" },
+            { id: 178, kuhou: "比況(若)", hakubun: "人生若寄。", kakikudashi: "人生は寄するが若し。", gendaigo: "人生は（この世に一時的に）身を寄せているようなものである。" },
+            { id: 179, kuhou: "仮定(郷)", hakubun: "郷使不守、必困。", kakikudashi: "郷に使守らざらしめば、必ず困しめん。", gendaigo: "もし以前に守らせていなかったならば、きっと困窮していたであろう。" },
+            { id: 180, kuhou: "再読文字(宜)", hakubun: "花開堪折直須折。", kakikudashi: "花開き折るに堪へば直ちに須らく折るべし。", gendaigo: "花が咲いて手折ることができるならば、すぐに手折るべきだ。" },
+            // 第19回
+            { id: 181, kuhou: "二重否定(不倶)", hakubun: "不倶戴天。", kakikudashi: "倶には天を戴かず。", gendaigo: "（仇敵とは）同じ天の下にはいない（生かしてはおかない）。" },
+            { id: 182, kuhou: "疑問(乎)", hakubun: "王之好楽甚、則斉国其庶几乎。", kakikudashi: "王の楽を好むこと甚だしければ、則ち斉の国は其れ庶幾からんか。", gendaigo: "王が音楽をお好きなことがこれほどであれば、斉の国は（天下を治めるに）近いでしょうか。" },
+            { id: 183, kuhou: "反語(敢不)", hakubun: "敢不敬乎。", kakikudashi: "敢へて敬せざらんや。", gendaigo: "どうして敬わずにいられようか、いや敬わないはずはない。" },
+            { id: 184, kuhou: "使役(募)", hakubun: "募民徙之。", kakikudashi: "民を募りて之を徙す。", gendaigo: "人民を募集して彼らを移住させる。" },
+            { id: 185, kuhou: "受身(見...於)", hakubun: "臣恐見欺於王。", kakikudashi: "臣王に欺かるるを恐る。", gendaigo: "私は王にだまされるのではないかと心配しております。" },
+            { id: 186, kuhou: "比較(A...不如B...)", hakubun: "聞名不如見面。", kakikudashi: "名を聞くは面を見るに如かず。", gendaigo: "噂を聞くのは、直接顔を見るのには及ばない。" },
+            { id: 187, kuhou: "仮定(設)", hakubun: "設吾為君、奈何。", kakikudashi: "設ひ吾をして君たらしめば、奈何。", gendaigo: "もしも私が君主であったとしたら、どうであろうか。" },
+            { id: 188, kuhou: "限定(唯...而已)", hakubun: "我心之憂、蓋是二三子之故。", kakikudashi: "我が心の憂へは、蓋し是れ二三子の故なり。", gendaigo: "私の心の心配事は、思うにあなたたち数人のことである。" },
+            { id: 189, kuhou: "抑揚(〜すら...況んや...)", hakubun: "鬼神且不能知、而況於人乎。", kakikudashi: "鬼神すら且つ知ること能はず、而るを況んや人に於いてをや。", gendaigo: "鬼や神でさえ知ることができない、まして人間ならなおさらだ。" },
+            { id: 190, kuhou: "再読文字(盍)", hakubun: "盍各言爾志。", kakikudashi: "盍ぞ各爾の志を言はざる。", gendaigo: "どうしてそれぞれお前の志を言わないのか、言えばよいのに。" },
+            // 第20回
+            { id: 191, kuhou: "二重否定(不為無)", hakubun: "不為無益。", kakikudashi: "益無きと為さず。", gendaigo: "無益だとはしない（＝有益だと思う）。" },
+            { id: 192, kuhou: "禁止(不復)", hakubun: "不復窺漢道。", kakikudashi: "復た漢の道を窺はず。", gendaigo: "二度と漢の領地をうかがうことはなかった。" },
+            { id: 193, kuhou: "選択(A乎B乎)", hakubun: "為我乎、為君乎。", kakikudashi: "我が為にか、君の為にか。", gendaigo: "私の為か、君主の為か。" },
+            { id: 194, kuhou: "使役(属)", hakubun: "属之廷尉。", kakikudashi: "之を廷尉に属す。", gendaigo: "この者（の身柄）を最高司法官に引き渡す。" },
+            { id: 195, kuhou: "累加(亦)", hakubun: "其死者亦復何言。", kakikudashi: "其の死する者も亦復た何ぞ言はん。", gendaigo: "その死んだ者もまた何を言えようか、いや何も言えない。" },
+            { id: 196, kuhou: "願望(惟)", hakubun: "惟師之助。", kakikudashi: "惟れ師の助けを。", gendaigo: "どうか先生のお助けを。" },
+            { id: 197, kuhou: "詠嘆(何〜之)", hakubun: "何一寒如此。", kakikudashi: "何ぞ一に此の如く寒き。", gendaigo: "なんとまあこれほどまでに寒いことか。" },
+            { id: 198, kuhou: "比況(〜のごとし)", hakubun: "其進鋭者、其退速。", kakikudashi: "其の進むこと鋭き者は、其の退くこと速やかなり。", gendaigo: "その進み方が鋭い者は、その退き方も速やかである。" },
+            { id: 199, kuhou: "仮定(縦令)", hakubun: "縦令司馬公、亦不能加也。", kakikudashi: "縦令ひ司馬公なりとも、亦た加ふること能はざるなり。", gendaigo: "たとえ司馬光（ほどの人物）であっても、これ以上付け加えることはできないだろう。" },
+            { id: 200, kuhou: "再読文字(蓋)", hakubun: "蓋不如帰。", kakikudashi: "蓋ぞ帰るに如かざる。", gendaigo: "どうして（故郷へ）帰るのが一番良いとしないのか、帰るのが良い。" }
+        ];
+
+
+        // --- DOM要素の取得 ---
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultScreen = document.getElementById('result-screen');
+        
+        const startButton = document.getElementById('start-button');
+        const checkButton = document.getElementById('check-button');
+        const nextButton = document.getElementById('next-button');
+        const restartButton = document.getElementById('restart-button');
+        
+        const questionCounter = document.getElementById('question-counter');
+        const scoreCounter = document.getElementById('score-counter');
+        const hakubunText = document.getElementById('hakubun-text');
+        
+        const kakikudashiInput = document.getElementById('kakikudashi-input');
+        const gendaigoInput = document.getElementById('gendaigo-input');
+        
+        const feedback = document.getElementById('feedback');
+        const answerDisplay = document.getElementById('answer-display');
+        const answerKuhou = document.getElementById('answer-kuhou');
+        const answerKakikudashi = document.getElementById('answer-kakikudashi');
+        const answerGendaigo = document.getElementById('answer-gendaigo');
+
+        const finalScore = document.getElementById('final-score');
+        const resultMessage = document.getElementById('result-message');
+        
+        // --- クイズの状態管理 ---
+        let shuffledQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        // --- 関数の定義 ---
+
+        // 配列をシャッフルする関数
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // クイズを開始する関数
+        function startQuiz() {
+            const allShuffled = shuffle([...questions]);
+            shuffledQuestions = allShuffled.slice(0, 10); // 10問をランダムに選ぶ
+            currentQuestionIndex = 0;
+            score = 0;
+            startScreen.classList.add('hidden');
+            resultScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            displayQuestion();
+        }
+
+        // 問題を表示する関数
+        function displayQuestion() {
+            const currentQuestion = shuffledQuestions[currentQuestionIndex];
+            questionCounter.textContent = `第${currentQuestionIndex + 1}問 / ${shuffledQuestions.length}問`;
+            scoreCounter.textContent = `正解数: ${score}`;
+            hakubunText.textContent = currentQuestion.hakubun;
+            
+            kakikudashiInput.value = '';
+            gendaigoInput.value = '';
+            feedback.textContent = '';
+            answerDisplay.classList.add('hidden');
+            
+            checkButton.disabled = false;
+            nextButton.disabled = true;
+            kakikudashiInput.focus();
+        }
+
+        // 解答を判定する関数
+        function checkAnswer() {
+            const currentQuestion = shuffledQuestions[currentQuestionIndex];
+            const userKakikudashi = kakikudashiInput.value.trim().replace(/[。、]/g, ''); // 句読点を削除して比較
+            
+            const correctKakikudashi = currentQuestion.kakikudashi.trim().replace(/[。、]/g, '');
+
+            // 書き下し文のみで正誤判定
+            if (userKakikudashi === correctKakikudashi) {
+                feedback.textContent = '正解！';
+                feedback.className = 'feedback-correct text-center font-bold text-lg min-h-[28px]';
+                score++;
+                scoreCounter.textContent = `正解数: ${score}`;
+            } else {
+                feedback.textContent = '不正解';
+                feedback.className = 'feedback-incorrect text-center font-bold text-lg min-h-[28px]';
+            }
+            
+            answerKuhou.textContent = currentQuestion.kuhou;
+            answerKakikudashi.textContent = currentQuestion.kakikudashi;
+            answerGendaigo.textContent = currentQuestion.gendaigo;
+            answerDisplay.classList.remove('hidden');
+            
+            checkButton.disabled = true;
+            nextButton.disabled = false;
+        }
+
+        // 次の問題に進む関数
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < shuffledQuestions.length) {
+                displayQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        // 結果を表示する関数
+        function showResult() {
+            quizScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+            finalScore.textContent = `${score} / ${shuffledQuestions.length}`;
+            
+            const percentage = (score / shuffledQuestions.length) * 100;
+            if (percentage === 100) {
+                resultMessage.textContent = '完璧です！句法マスターの称号を授けます。';
+            } else if (percentage >= 80) {
+                resultMessage.textContent = '素晴らしい成績です！句法の知識はほぼ完璧です。';
+            } else if (percentage >= 60) {
+                resultMessage.textContent = '良い調子です！苦手な部分を復習して完璧を目指しましょう。';
+            } else {
+                resultMessage.textContent = 'まだ伸びしろがありますね。繰り返し挑戦して知識を定着させましょう！';
+            }
+        }
+
+        // --- イベントリスナーの設定 ---
+        startButton.addEventListener('click', startQuiz);
+        checkButton.addEventListener('click', checkAnswer);
+        nextButton.addEventListener('click', nextQuestion);
+        restartButton.addEventListener('click', startQuiz);
+
+        // Enterキーで判定できるようにする
+        kakikudashiInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if(!checkButton.disabled) {
+                   checkAnswer();
+                }
+            }
+        });
+        gendaigoInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if(!checkButton.disabled) {
+                   checkAnswer();
+                }
+            }
+        });
+
+    </script>
+</body>
+</html>
