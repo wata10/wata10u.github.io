@@ -110,15 +110,14 @@
         // --- データの準備 ---
         const questions = [
             // 全182問のデータ
-            { id: 1, kuhou: "否定", hakubun: "君子不争。", kakikudashi: "君子は争はず。", gendaigo: "徳のある立派な人は争わない。" },
-            { id: 2, kuhou: "疑問", hakubun: "誰能為此。", kakikudashi: "誰か能く此を為さん。", gendaigo: "誰がこれをできるだろうか。" },
-            { id: 4, kuhou: "使役", hakubun: "項王使人問。", kakikudashi: "項王人をして問はしむ。", gendaigo: "項王は（家来に）人をやって質問させた。" },
-            { id: 5, kuhou: "受身", hakubun: "虎為猟者所殺。", kakikudashi: "虎猟者の殺す所と為る。", gendaigo: "虎は猟師に殺された。" },
-            { id: 6, kuhou: "可能", hakubun: "可以為師矣。", kakikudashi: "以て師と為るべし。", gendaigo: "（これを手本として）師とすることができる。" },
-            { id: 7, kuhou: "比較", hakubun: "苛政猛於虎也。", kakikudashi: "苛政は虎よりも猛なり。", gendaigo: "過酷な政治は虎よりもどう猛である。" },
-            { id: 8, kuhou: "仮定", hakubun: "若如公言、則四方之民望之矣。", kakikudashi: "若し公の言の如くんば、則ち四方の民之を望まん。", gendaigo: "もしあなたのお言葉通りなら、四方の民は（あなたを）待ち望むでしょう。" },
-            { id: 9, kuhou: "限定", hakubun: "唯我独尊。", kakikudashi: "唯だ我独り尊し。", gendaigo: "ただ私だけが尊い。" },
-            { id: 10, kuhou: "再読文字", hakubun: "臣将奏之。", kakikudashi: "臣将に之を奏せんとす。", gendaigo: "私めは今にもこのことを君主に申し上げようとしております。" },
+            { id: 1, kuhou: "返読文字(1)", hakubun: "有害無益。", kakikudashi: "害有りて益無し。", gendaigo: "害が有って何の益もない" },
+            { id: 2, kuhou: "返読文字(1)", hakubun: "悪可変為善。", kakikudashi: "悪は変じて善と為すべし。", gendaigo: "悪は変えて善にすることができる。" },
+            { id: 3, kuhou: "返読文字(1)", hakubun: "我為我。", kakikudashi: "我は我たり。", gendaigo: "私は私である。" },
+            { id: 5, kuhou: "返読文字(2)", hakubun: "多労少功。", kakikudashi: "労多く功少し。", gendaigo: "苦労が多く、実りは少ない。" },
+            { id: 6, kuhou: "返読文字(2)", hakubun: "少年易老学難成。", kakikudashi: "少年老い易く学成り難し。", gendaigo: "若者は年をとるのは早く、学問はなかなか成就しない。" },
+            { id: 8, kuhou: "返読文字(2)", hakubun: "君自故郷来。", kakikudashi: "君故郷より来たる。", gendaigo: "君は故郷からやってきた。" },
+            { id: 9, kuhou: "返読文字(2)", hakubun: "貧与賤是人之所悪也。", kakikudashi: "貧と賤とは是れ人の悪む所なり。", gendaigo: "貧乏と身分が低いことは人が誰もが嫌うものである。" },
+            { id: 10, kuhou: "返読文字(2)", hakubun: "項氏所以失添加者何也。", kakikudashi: "項氏の天下を失ひし所以の者は何ぞや。", gendaigo: "項氏が天下を失ったわけは何か。" },
             { id: 11, kuhou: "禁止", hakubun: "過則勿憚改。", kakikudashi: "過てば則ち改むるに憚ること勿かれ。", gendaigo: "過ちを犯したならば、改めることをためらってはならない。" },
             { id: 12, kuhou: "二重否定", hakubun: "不可不知也。", kakikudashi: "知らざるべからずなり。", gendaigo: "知らないわけにはいかないのだ。" },
             { id: 13, kuhou: "選択", hakubun: "寧為鶏口、無為牛後。", kakikudashi: "寧ろ鶏口と為るも、牛後と為る無かれ。", gendaigo: "いっそ鶏の口（小さな団体の長）となっても、牛の尻（大きな団体の末端）となるな。" },
