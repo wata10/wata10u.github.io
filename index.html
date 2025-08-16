@@ -108,26 +108,7 @@
 
     <script>
         // --- データの準備 ---
-        const questions = [
-            // 全182問のデータ
-            { id: 1, kuhou: "返読文字(1)", hakubun: "有害無益。", kakikudashi: "害有りて益無し。", gendaigo: "害が有って何の益もない" },
-            { id: 2, kuhou: "返読文字(1)", hakubun: "悪可変為善。", kakikudashi: "悪は変じて善と為すべし。", gendaigo: "悪は変えて善にすることができる。" },
-            { id: 3, kuhou: "返読文字(1)", hakubun: "我為我。", kakikudashi: "我は我たり。", gendaigo: "私は私である。" },
-            { id: 5, kuhou: "返読文字(2)", hakubun: "多労少功。", kakikudashi: "労多く功少し。", gendaigo: "苦労が多く、実りは少ない。" },
-            { id: 6, kuhou: "返読文字(2)", hakubun: "少年易老学難成。", kakikudashi: "少年老い易く学成り難し。", gendaigo: "若者は年をとるのは早く、学問はなかなか成就しない。" },
-            { id: 8, kuhou: "返読文字(2)", hakubun: "君自故郷来。", kakikudashi: "君故郷より来たる。", gendaigo: "君は故郷からやってきた。" },
-            { id: 9, kuhou: "返読文字(2)", hakubun: "貧与賤是人之所悪也。", kakikudashi: "貧と賤とは是れ人の悪む所なり。", gendaigo: "貧乏と身分が低いことは人が誰もが嫌うものである。" },
-            { id: 10, kuhou: "返読文字(2)", hakubun: "項氏所以失天下者何也。", kakikudashi: "項氏の天下を失ひし所以の者は何ぞや。", gendaigo: "項氏が天下を失ったわけは何か。" },
-            { id: 11, kuhou: "再読文字(1)", hakubun: "未嘗敗北。", kakikudashi: "未だ嘗て敗北せず。", gendaigo: "まだ今まで一度も負けたことがない。" },
-            { id: 12, kuhou: "再読文字(1)", hakubun: "始皇帝将死。", kakikudashi: "始皇帝将に死せんとす。", gendaigo: "始皇帝は今にも死にそうだ。" },
-            { id: 13, kuhou: "再読文字(1)", hakubun: "日且入。", kakikudashi: "日且に入らんとす。", gendaigo: "日が今にも沈もうとしている。" },
-            { id: 14, kuhou: "再読文字(1)", hakubun: "当惜寸陰。", kakikudashi: "当に寸陰を惜しむべし。", gendaigo: "わずかな時間も惜しまなければならない。" },
-            { id: 15, kuhou: "再読文字(1)", hakubun: "応知故郷事。", kakikudashi: "応に故郷の事を知るべし。", gendaigo: "きっと故郷のことを知っているだろう。" },
-            { id: 16, kuhou: "再読文字(2)", hakubun: "宜従師之言。", kakikudashi: "宜しく師の言に従ふべし。", gendaigo: "先生の言葉に従うのがよろしい。" },
-            { id: 17, kuhou: "詠嘆", hakubun: "須常思病苦時。", kakikudashi: "須らく常に病苦の時を思ふべし。", gendaigo: "常に病気で苦しんだ時のことを思い出す必要がある。" },
-            { id: 18, kuhou: "比況", hakubun: "過猶不及。", kakikudashi: "過ぎたるは猶ほ及ばざるがごとし。", gendaigo: "行きすぎたことをするのは、そこまで及ばないのと同じだ。" },
-            { id: 19, kuhou: "詠嘆", hakubun: "危由累卵。", kakikudashi: "危きこと由ほ累卵のごとし。", gendaigo: "危ないことはあたかも積み重ねた卵のようだ。" },
-            { id: 20, kuhou: "再読文字", hakubun: "ガイ                <h4 class="font-bold text-yellow-800">正解</h4>
+                <h4 class="font-bold text-yellow-800">正解</h4>
                 <p class="text-yellow-700"><strong class="font-bold">句法：</strong> <span id="answer-kuhou"></span></p>
                 <p class="text-yellow-700"><strong class="font-bold">書き下し文：</strong> <span id="answer-kakikudashi"></span></p>
                 <p class="text-yellow-700"><strong class="font-bold">現代語訳：</strong> <span id="answer-gendaigo"></span></p>
@@ -180,19 +161,19 @@
             { id: 29, kuhou: "不可能・禁止", hakubun: "其人不能応也。", kakikudashi: "其の人応ふる能はざるなり。", gendaigo: "其の人は答えることができなかった。" },
             { id: 30, kuhou: "不可能・禁止", hakubun: "終不得帰漢。", kakikudashi: "終に漢に帰るを得ず。", gendaigo: "とうとう漢に帰ることができなかった。" },
             { id: 31, kuhou: "不可能・禁止", hakubun: "莫能仰視。", kakikudashi: "能く仰ぎ視るもの莫し。", gendaigo: "仰ぎ見ることができるものはなかった。" },
-            { id: 32, kuhou: "不可能・禁止", hakubun: "。", kakikudashi: "客何為れぞ去らざる。", gendaigo: "あなたはどうして立ち去らないのか、立ち去ればよいのに。" },
-            { id: 33, kuhou: "受身(被)", hakubun: "信而見疑、忠而被謗。", kakikudashi: "信にして疑はれ、忠にして謗らる。", gendaigo: "誠実であっても疑われ、忠義を尽くしてもそしられる。" },
-            { id: 34, kuhou: "可能(能)", hakubun: "孰能無過。", kakikudashi: "孰か能く過ち無からんや。", gendaigo: "誰が過ちのないことなどあろうか、いや誰でも過ちはある。" },
-            { id: 35, kuhou: "限定(徒)", hakubun: "徒聞其語、未見其人。", kakikudashi: "徒だ其の語を聞くも、未だ其の人を見ず。", gendaigo: "ただその言葉を聞くだけで、まだその人に会ったことはない。" },
-            { id: 36, kuhou: "累加(復)", hakubun: "不復出。", kakikudashi: "復た出でず。", gendaigo: "二度とそこから外へ出なかった。" },
-            { id: 37, kuhou: "抑揚(尚)", hakubun: "臣尚不敢読此書、況於経書乎。", kakikudashi: "臣尚ほ敢へて此の書を読まず、況んや経書に於いてをや。", gendaigo: "私でさえこの書物を読む勇気がない、まして（難解な）経典についてはなおさらだ。" },
-            { id: 38, kuhou: "詠嘆(乎)", hakubun: "危乎高哉。", kakikudashi: "危ふきかな高きかな。", gendaigo: "なんと危険でなんと高いことか。" },
-            { id: 39, kuhou: "禁止(毋)", hakubun: "己所不欲、毋施於人。", kakikudashi: "己の欲せざる所、人に施すこと毋かれ。", gendaigo: "自分がしてほしくないことを、他人にしてはならない。" },
-            { id: 40, kuhou: "再読文字(宜)", hakubun: "宜急追之。", kakikudashi: "宜しく急に之を追ふべし。", gendaigo: "急いで彼らを追うのがよい。" },
-            { id: 41, kuhou: "否定(非)", hakubun: "人非聖人。", kakikudashi: "人は聖人にあらず。", gendaigo: "人は聖人ではない。" },
-            { id: 42, kuhou: "疑問(何処)", hakubun: "先生何処也。", kakikudashi: "先生何処にか在る。", gendaigo: "先生はどこにいらっしゃるのですか。" },
-            { id: 43, kuhou: "反語(不亦〜乎)", hakubun: "不亦楽乎。", kakikudashi: "亦た楽しからずや。", gendaigo: "またなんと楽しいことではないか。" },
-            { id: 44, kuhou: "使役(教)", hakubun: "教韓信分兵。", kakikudashi: "韓信に兵を分かたしむ。", gendaigo: "韓信に兵を分けて率いさせる。" },
+            { id: 32, kuhou: "不可能・禁止", hakubun: "過則勿憚改。", kakikudashi: "過ちては則ち改むるに憚ること勿かれ。", gendaigo: "過ちを犯したら改めることをためらってはいけない。" },
+            { id: 33, kuhou: "二重否定(1)", hakubun: "無不知愛其親。", kakikudashi: "其の親を愛するを知らざる無し。", gendaigo: "自分の親を愛することを知らないものはない。" },
+            { id: 34, kuhou: "二重否定(1)", hakubun: "無木不枯。", kakikudashi: "木として枯れざるは無し。", gendaigo: "どんな木でも枯れないものはない。" },
+            { id: 35, kuhou: "二重否定(1)", hakubun: "無非王土。", kakikudashi: "王土に非ざるは無し。", gendaigo: "王の土地でないものはない。" },
+            { id: 36, kuhou: "二重否定(1)", hakubun: "非不説子之道。", kakikudashi: "子の道を説ばざるに非ず。", gendaigo: "先生の教えをうれしく思わないわけではない。" },
+            { id: 37, kuhou: "二重否定(1)", hakubun: "君子非無過。", kakikudashi: "君子過ち無きに非ず。", gendaigo: "君子にだって過ちがないわけではない。" },
+            { id: 38, kuhou: "二重否定(2)", hakubun: "未嘗不勝。", kakikudashi: "未だ嘗て勝たずんばあらず。", gendaigo: "まだ今まで一度も勝たなかったことはない。" },
+            { id: 39, kuhou: "二重否定(2)", hakubun: "天下未嘗無賢者。", kakikudashi: "天下未だ嘗て賢者無くんばあらず。", gendaigo: "天下にまだ今まで賢者がいなかったことはない。" },
+            { id: 40, kuhou: "二重否定(2)", hakubun: "不敢不告。", kakikudashi: "敢へて告げずんばあらず。", gendaigo: "告げないわけにはいかない。" },
+            { id: 41, kuhou: "二重否定(2)", hakubun: "弟子不必不如師。", kakikudashi: "弟子必ずしも師に如かずんばあらず。", gendaigo: "弟子が必ずしも師匠に及ばないわけではない。" },
+            { id: 42, kuhou: "二重否定(2)", hakubun: "言不可不慎。", kakikudashi: "言は慎まざるべからず。", gendaigo: "ことばは慎重に選ばなければならない。" },
+            { id: 43, kuhou: "二重否定(2)", hakubun: "不能不学。", kakikudashi: "学ばざる能はず。", gendaigo: "学ばないではいられない。" },
+            { id: 44, kuhou: "二重否定(2)", hakubun: "不得不語。", kakikudashi: "語らざるを得ず。", gendaigo: "話さないではいられない。" },
             { id: 45, kuhou: "可能(足)", hakubun: "不足為道也。", kakikudashi: "道と為すに足らず。", gendaigo: "取り上げて言うほどの価値もない。" },
             { id: 46, kuhou: "比較(不如)", hakubun: "百聞不如一見。", kakikudashi: "百聞は一見に如かず。", gendaigo: "百回聞くことは一回見る事には及ばない。" },
             { id: 47, kuhou: "仮定(雖)", hakubun: "雖有明君、不能賞無功。", kakikudashi: "明君有りと雖も、無功を賞すること能はず。", gendaigo: "たとえ優れた君主がいたとしても、功績のない者にほうびを与えることはできない。" },
