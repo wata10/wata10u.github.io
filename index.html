@@ -106,29 +106,7 @@
 
     </div>
 
-    <script>
-        // --- データの準備 ---
-                <h4 class="font-bold text-yellow-800">正解</h4>
-                <p class="text-yellow-700"><strong class="font-bold">句法：</strong> <span id="answer-kuhou"></span></p>
-                <p class="text-yellow-700"><strong class="font-bold">書き下し文：</strong> <span id="answer-kakikudashi"></span></p>
-                <p class="text-yellow-700"><strong class="font-bold">現代語訳：</strong> <span id="answer-gendaigo"></span></p>
-            </div>
-        </div>
-
-        <!-- 結果画面 -->
-        <div id="result-screen" class="hidden text-center">
-            <h2 class="text-3xl font-bold mb-4 text-slate-900">クイズ終了！</h2>
-            <p class="text-xl text-slate-600 mb-6">お疲れ様でした。</p>
-            <div class="text-5xl font-bold mb-8" id="final-score"></div>
-            <p id="result-message" class="text-lg mb-8"></p>
-            <button id="restart-button" class="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors text-lg">
-                もう一度挑戦する
-            </button>
-        </div>
-
-    </div>
-
-    <script>
+       <script>
         // --- データの準備 ---
         const questions = [
             // 全182問のデータ
@@ -200,13 +178,13 @@
             { id: 71, kuhou: "疑問・反語(3)", hakubun: "如何不涙垂。", kakikudashi: "如何ぞ涙垂れざらん。", gendaigo: "どうして涙を垂らさずにいられようか、いやいられない。" },
             { id: 72, kuhou: "疑問・反語(3)", hakubun: "人生幾何。", kakikudashi: "人生幾何ぞ。", gendaigo: "人生(の長さ)はどれほどであろうか、いやどれほどでもない。" },
             { id: 73, kuhou: "疑問・反語(4)", hakubun: "不読書何也。", kakikudashi: "書を読まざるは何ぞや。", gendaigo: "書物を読まないのはどうしてか。" },
-            { id: 75, kuhou: "受身(為)", hakubun: "。", kakikudashi: "人の笑ふ所と為る。", gendaigo: "人に笑われる。" },
-            { id: 76, kuhou: "比較(孰与)", hakubun: "我孰与城北徐公美。", kakikudashi: "我は城北の徐公の美に孰与れぞ。", gendaigo: "私と城北の徐公とでは、どちらが美しいか。" },
-            { id: 77, kuhou: "仮定(誠)", hakubun: "誠能聴臣、莫若与之絶。", kakikudashi: "誠に能く臣に聴かば、之と絶つに若くは莫し。", gendaigo: "もし本当に私の言うことをお聞き入れくださるなら、あれ（秦）と国交を断絶するに越したことはありません。" },
-            { id: 78, kuhou: "限定(直)", hakubun: "直百歩耳。", kakikudashi: "直だ百歩のみ。", gendaigo: "わずか百歩にすぎない。" },
-            { id: 80, kuhou: "再読文字(応)", hakubun: "応知故郷事。", kakikudashi: "応に故郷の事を知るべし。", gendaigo: "きっと故郷の事を分かってくれるにちがいない。" },
-            { id: 81, kuhou: "二重否定(無A不B)", hakubun: "無友不如己者。", kakikudashi: "己に如かざる者を友とすること無かれ。", gendaigo: "自分に及ばない者を友人とするな。" },
-            { id: 83, kuhou: "反語(悪乎)", hakubun: "君子去仁、悪成名。", kakikudashi: "君子仁を去りて、悪くんぞ名を成さん。", gendaigo: "君子が仁を捨てて、どうして名声をあげることができようか、いやできない。" },
+            { id: 75, kuhou: "疑問・反語(4)", hakubun: "以五十歩笑百歩則何如。", kakikudashi: "五十歩を以て百歩を笑はば則ち何如。", gendaigo: "自分が五十歩だという理由で百歩逃げた者を笑ったとしたら、どうでしょうか。" },
+            { id: 76, kuhou: "疑問・反語(4)", hakubun: "汝与回孰愈。", kakikudashi: "汝と回とは孰れか愈れる。", gendaigo: "おまえと顔回とはどちらがすぐれているか。" },
+            { id: 77, kuhou: "疑問・反語(4)", hakubun: "視吾舌、尚在否。", kakikudashi: "吾が舌を視よ、尚ほ在りや否や。", gendaigo: "私の舌を見ろ、まだあるかどうか。" },
+            { id: 78, kuhou: "疑問・反語(4)", hakubun: "寒梅開花未。", kakikudashi: "寒梅花を開きしや未だしや。", gendaigo: "寒梅は花をつけただろうか、まだだろうか。" },
+            { id: 80, kuhou: "疑問・反語(5)", hakubun: "豈忘父母之恩哉。", kakikudashi: "豈に父母の恩を忘れんや。", gendaigo: "どうして父母の恩を忘れるだろうか、いや忘れたりはしない。" },
+            { id: 81, kuhou: "疑問・反語(5)", hakubun: "独畏廉将軍哉。", kakikudashi: "独り廉将軍を畏れんや。", gendaigo: "どうして廉将軍を恐れるだろうか、いや恐れたりはしない。" },
+            { id: 83, kuhou: "疑問・反語(5)", hakubun: "百獣之見我而敢不走乎。", kakikudashi: "百獣の我を見て敢へて走らざらんや。", gendaigo: "あらゆる獣たちが私を見て、どうして逃げ出さないだろうか、いやみんな逃げ出すだろう。" },
             { id: 84, kuhou: "使役(命)", hakubun: "命曰殺之。", kakikudashi: "命じて曰はく、「之を殺せ」と。", gendaigo: "（王が）命じて言うことには、「そいつを殺せ」と。" },
             { id: 85, kuhou: "受身(る・らる)", hakubun: "不見納。", kakikudashi: "納れられず。", gendaigo: "受け入れられない。" },
             { id: 86, kuhou: "不可能(不能)", hakubun: "項羽不能有天下。", kakikudashi: "項羽天下を有つこと能はず。", gendaigo: "項羽は天下を所有することができなかった。" },
@@ -313,6 +291,26 @@
             { id: 200, kuhou: "再読文字(蓋)", hakubun: "蓋不如帰。", kakikudashi: "蓋ぞ帰るに如かざる。", gendaigo: "どうして（故郷へ）帰るのが一番良いとしないのか、帰るのが良い。" }
         ];
 
+        // --- データの準備 ---
+                <h4 class="font-bold text-yellow-800">正解</h4>
+                <p class="text-yellow-700"><strong class="font-bold">句法：</strong> <span id="answer-kuhou"></span></p>
+                <p class="text-yellow-700"><strong class="font-bold">書き下し文：</strong> <span id="answer-kakikudashi"></span></p>
+                <p class="text-yellow-700"><strong class="font-bold">現代語訳：</strong> <span id="answer-gendaigo"></span></p>
+            </div>
+        </div>
+
+        <!-- 結果画面 -->
+        <div id="result-screen" class="hidden text-center">
+            <h2 class="text-3xl font-bold mb-4 text-slate-900">クイズ終了！</h2>
+            <p class="text-xl text-slate-600 mb-6">お疲れ様でした。</p>
+            <div class="text-5xl font-bold mb-8" id="final-score"></div>
+            <p id="result-message" class="text-lg mb-8"></p>
+            <button id="restart-button" class="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors text-lg">
+                もう一度挑戦する
+            </button>
+        </div>
+
+    </div>
 
         // --- DOM要素の取得 ---
         const startScreen = document.getElementById('start-screen');
