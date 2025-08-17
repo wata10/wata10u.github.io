@@ -101,10 +101,16 @@
             </button>
         </div>
 
-    </div> <script>
+    </div>
+
+    <script>
+    // ▼▼▼▼▼▼▼▼▼▼▼▼▼▼ 修正箇所 ▼▼▼▼▼▼▼▼▼▼▼▼▼▼
+    document.addEventListener('DOMContentLoaded', function() {
+    // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲ 修正箇所 ▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+
         // --- データの準備 ---
         const questions = [
-            // 全182問のデータ
+            // (データ部分は省略)
             { id: 1, kuhou: "返読文字(1)", hakubun: "有害無益。", kakikudashi: "害有りて益無し。", gendaigo: "害が有って何の益もない" },
             { id: 2, kuhou: "返読文字(1)", hakubun: "悪可変為善。", kakikudashi: "悪は変じて善と為すべし。", gendaigo: "悪は変えて善にすることができる。" },
             { id: 3, kuhou: "返読文字(1)", hakubun: "我為我。", kakikudashi: "我は我たり。", gendaigo: "私は私である。" },
@@ -318,8 +324,6 @@
         let score = 0;
 
         // --- 関数の定義 ---
-
-        // 配列をシャッフルする関数
         function shuffle(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -328,10 +332,9 @@
             return array;
         }
 
-        // クイズを開始する関数
         function startQuiz() {
             const allShuffled = shuffle([...questions]);
-            shuffledQuestions = allShuffled.slice(0, 10); // 10問をランダムに選ぶ
+            shuffledQuestions = allShuffled.slice(0, 10);
             currentQuestionIndex = 0;
             score = 0;
             startScreen.classList.add('hidden');
@@ -340,7 +343,6 @@
             displayQuestion();
         }
 
-        // 問題を表示する関数
         function displayQuestion() {
             const currentQuestion = shuffledQuestions[currentQuestionIndex];
             questionCounter.textContent = `第${currentQuestionIndex + 1}問 / ${shuffledQuestions.length}問`;
@@ -357,14 +359,11 @@
             kakikudashiInput.focus();
         }
 
-        // 解答を判定する関数
         function checkAnswer() {
             const currentQuestion = shuffledQuestions[currentQuestionIndex];
-            const userKakikudashi = kakikudashiInput.value.trim().replace(/[。、]/g, ''); // 句読点を削除して比較
-            
+            const userKakikudashi = kakikudashiInput.value.trim().replace(/[。、]/g, '');
             const correctKakikudashi = currentQuestion.kakikudashi.trim().replace(/[。、]/g, '');
 
-            // 書き下し文のみで正誤判定
             if (userKakikudashi === correctKakikudashi) {
                 feedback.textContent = '正解！';
                 feedback.className = 'feedback-correct text-center font-bold text-lg min-h-[28px]';
@@ -384,7 +383,6 @@
             nextButton.disabled = false;
         }
 
-        // 次の問題に進む関数
         function nextQuestion() {
             currentQuestionIndex++;
             if (currentQuestionIndex < shuffledQuestions.length) {
@@ -394,7 +392,6 @@
             }
         }
 
-        // 結果を表示する関数
         function showResult() {
             quizScreen.classList.add('hidden');
             resultScreen.classList.remove('hidden');
@@ -418,7 +415,6 @@
         nextButton.addEventListener('click', nextQuestion);
         restartButton.addEventListener('click', startQuiz);
 
-        // Enterキーで判定できるようにする
         kakikudashiInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
@@ -435,6 +431,10 @@
                 }
             }
         });
+
+    // ▼▼▼▼▼▼▼▼▼▼▼▼▼▼ 修正箇所 ▼▼▼▼▼▼▼▼▼▼▼▼▼▼
+    });
+    // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲ 修正箇所 ▲▲▲▲▲▲▲▲▲▲▲▲▲▲
     </script>
 
 </body>
